@@ -1,138 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ENIGMA M3 | HARD-WIRED ASSEMBLY</title>
+    <title>ENIGMA M3 | FINAL REPAIR</title>
     <style>
-        :root { --rotor-y: #b8860b; --lamp-b: #4682b4; --key-p: #99326b; --plug-g: #228b22; }
-        body { background: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Courier New', monospace; color: white; }
-        
-        .machine-wrap { background: #2b1d11; padding: 20px; border: 10px solid #1a110a; transform: perspective(1000px) rotateX(15deg); box-shadow: 0 50px 100px #000; }
-        .chassis { width: 680px; background: #111; border: 2px solid #333; display: flex; flex-direction: column; }
-
-        /* TIERED SECTIONS */
-        .section { position: relative; border-bottom: 10px solid #000; padding: 20px; }
-        .rotors { background: var(--rotor-y); height: 100px; display: flex; justify-content: center; gap: 15px; }
-        .lamps { background: var(--lamp-b); display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; }
-        .keys { background: var(--key-p); display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; border-bottom: none; }
-        .plugs { background: var(--plug-g); padding: 15px; display: flex; flex-direction: column; align-items: center; }
-
-        /* HARDWARE UI */
-        .rotor-box { width: 50px; height: 70px; background: #000; border: 3px solid #444; color: gold; font-size: 2rem; font-weight: bold; display: flex; justify-content: center; align-items: center; }
-        .bulb { width: 35px; height: 35px; border-radius: 50%; background: #222; border: 2px solid #444; display: flex; justify-content: center; align-items: center; color: #444; font-weight: bold; }
-        .bulb.on { background: #fffbe6; color: #000; box-shadow: 0 0 20px #fff; border-color: #fff; }
-        .key-btn { width: 40px; height: 40px; border-radius: 50%; background: #000; border: 2px solid #ccc; display: flex; justify-content: center; align-items: center; font-weight: bold; }
-        
-        #plugboard { background: #000; color: #0f0; border: 1px solid #0f0; width: 80%; padding: 8px; text-transform: uppercase; letter-spacing: 2px; }
-        .tape { background: #fdf5e6; color: #000; width: 640px; padding: 15px; margin-bottom: 10px; font-weight: bold; border-left: 10px solid #ccc; min-height: 1.2em; }
-        .reset-btn { background: #a00; color: white; border: none; padding: 10px; cursor: pointer; margin-left: 20px; font-weight: bold; }
+        body { background: #111; color: white; font-family: monospace; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .tape { background: white; color: black; width: 600px; padding: 15px; font-size: 24px; font-weight: bold; margin-bottom: 20px; border: 4px solid #b8860b; min-height: 1.5em; overflow-wrap: break-word; }
+        .rotor-display { display: flex; gap: 10px; margin-bottom: 20px; }
+        .rotor { width: 60px; height: 80px; background: #333; border: 2px solid gold; display: flex; justify-content: center; align-items: center; font-size: 40px; color: gold; }
+        .keyboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; background: #222; padding: 20px; border-radius: 10px; }
+        .key { width: 40px; height: 40px; border: 1px solid #555; display: flex; justify-content: center; align-items: center; background: #000; cursor: pointer; }
+        .key.active { background: white; color: black; box-shadow: 0 0 15px white; }
+        .controls { margin-top: 20px; }
+        button { padding: 10px 20px; background: red; color: white; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="tape" id="output-tape">>> </div>
+    <div class="tape" id="tape">>> </div>
 
-<div class="machine-wrap">
-    <div class="chassis">
-        <div class="section rotors">
-            <div class="rotor-box" id="disp-2">A</div>
-            <div class="rotor-box" id="disp-1">A</div>
-            <div class="rotor-box" id="disp-0">A</div>
-            <button class="reset-btn" onclick="resetEnigma()">RESET</button>
-        </div>
-
-        <div class="section lamps" id="lamp-grid"></div>
-        <div class="section keys" id="key-grid"></div>
-
-        <div class="section plugs">
-            <input type="text" id="plugboard" placeholder="PAIRS (E.G. AZ BY)">
-        </div>
+    <div class="rotor-display">
+        <div class="rotor" id="r2">A</div>
+        <div class="rotor" id="r1">A</div>
+        <div class="rotor" id="r0">A</div>
     </div>
-</div>
+
+    <div class="keyboard" id="kb"></div>
+
+    <div class="controls">
+        <button onclick="resetAll()">RESET MACHINE</button>
+    </div>
 
 <script>
-    const chars = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const rotorI = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
-    const reflectorB = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
-    
-    let pos = [0, 0, 0]; // R, M, L
+    const kbLayout = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
+    const rotorI =   "EKMFLGDQVZNTOWYHXUSPAIBRCJ"; // Wiring for Rotor I
+    const reflectorB = "YRUHQSLDPXNGOKMIEBFZCWVJAT"; // Wiring for Reflector B
 
-    // Build UI
-    chars.forEach(c => {
-        document.getElementById('lamp-grid').innerHTML += `<div class="bulb" id="L-${c}">${c}</div>`;
-        document.getElementById('key-grid').innerHTML += `<div class="key-btn" id="K-${c}">${c}</div>`;
+    let pos = [0, 0, 0]; // [Right, Middle, Left] offsets
+
+    // Initialize Keyboard UI
+    kbLayout.forEach(char => {
+        document.getElementById('kb').innerHTML += `<div class="key" id="K-${char}">${char}</div>`;
     });
 
-    function resetEnigma() {
+    function resetAll() {
         pos = [0, 0, 0];
-        document.getElementById('output-tape').innerText = ">> ";
-        updateDisplay();
+        document.getElementById('tape').innerText = ">> ";
+        updateUI();
     }
 
-    function updateDisplay() {
-        pos.forEach((v, i) => {
-            document.getElementById(`disp-${i}`).innerText = alphabet[v];
+    function updateUI() {
+        pos.forEach((p, i) => {
+            document.getElementById(`r${i}`).innerText = alphabet[p];
         });
     }
 
-    function getPlug(c) {
-        const val = document.getElementById('plugboard').value.toUpperCase();
-        const pairs = val.split(" ");
-        for (let p of pairs) {
-            if (p.length === 2) {
-                if (p[0] === c) return p[1];
-                if (p[1] === c) return p[0];
-            }
-        }
-        return c;
-    }
-
-    function step() {
+    function enigma(char) {
+        // 1. Step the right rotor first
         pos[0] = (pos[0] + 1) % 26;
         if (pos[0] === 0) pos[1] = (pos[1] + 1) % 26;
-        if (pos[1] === 0 && pos[0] === 0) pos[2] = (pos[2] + 1) % 26;
-        updateDisplay();
-    }
+        updateUI();
 
-    function encrypt(c) {
-        step();
-        let char = getPlug(c);
-        
-        // Forward through Rotor I
+        // 2. Map through rotors (Forward)
+        // Signal enters, gets shifted by current rotor position
         let idx = (alphabet.indexOf(char) + pos[0]) % 26;
-        let wireOut = rotorI[idx];
-        let contactIdx = (alphabet.indexOf(wireOut) - pos[0] + 26) % 26;
+        let forwardChar = rotorI[idx];
         
-        // Reflector
-        let refChar = reflectorB[contactIdx];
+        // Signal leaves rotor, shift back for 'global' index
+        let reflectedIdx = (alphabet.indexOf(forwardChar) - pos[0] + 26) % 26;
         
-        // Reverse through Rotor I
-        let revIdx = (alphabet.indexOf(refChar) + pos[0]) % 26;
-        let revWireOut = alphabet[rotorI.indexOf(alphabet[revIdx])];
-        let finalIdx = (alphabet.indexOf(revWireOut) - pos[0] + 26) % 26;
+        // 3. Reflect
+        let reflectedChar = reflectorB[reflectedIdx];
         
-        return getPlug(alphabet[finalIdx]);
+        // 4. Map through rotors (Reverse)
+        let revInIdx = (alphabet.indexOf(reflectedChar) + pos[0]) % 26;
+        let reverseChar = alphabet[rotorI.indexOf(alphabet[revInIdx])];
+        let finalIdx = (alphabet.indexOf(reverseChar) - pos[0] + 26) % 26;
+
+        return alphabet[finalIdx];
     }
 
+    // Input Handling
     window.addEventListener('keydown', (e) => {
         const key = e.key.toUpperCase();
-        if (alphabet.includes(key) && e.target.tagName !== 'INPUT') {
-            const result = encrypt(key);
-            
-            // Light Lamp
-            document.querySelectorAll('.bulb').forEach(b => b.classList.remove('on'));
-            const bulb = document.getElementById(`L-${result}`);
-            if (bulb) bulb.classList.add('on');
-            
-            // Write Tape
-            document.getElementById('output-tape').innerText += result;
+        if (alphabet.includes(key)) {
+            // Highlight virtual key
+            const el = document.getElementById(`K-${key}`);
+            if(el) el.classList.add('active');
+
+            // Encrypt and Output
+            const result = enigma(key);
+            document.getElementById('tape').innerText += result;
         }
     });
 
-    window.addEventListener('keyup', () => {
-        document.querySelectorAll('.bulb').forEach(b => b.classList.remove('on'));
+    window.addEventListener('keyup', (e) => {
+        const key = e.key.toUpperCase();
+        const el = document.getElementById(`K-${key}`);
+        if(el) el.classList.remove('active');
     });
+
 </script>
 </body>
 </html>
