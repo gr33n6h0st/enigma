@@ -3,142 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bletchley Park | Enigma Simulator</title>
+    <title>ULTRA | TOP SECRET DECODER</title>
     <style>
         :root {
+            --alert-red: #ff3e3e;
             --paper: #d2c5a2;
-            --metal: #2c2c2c;
-            --army-green: #4b5320;
-            --bakelite: #1a1a1a;
+            --metal: #1a1b1e;
+            --army-green: #3d441e;
         }
 
         body {
-            background-color: #121212;
+            background-color: #0a0a0a;
             color: var(--paper);
             font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            overflow-x: hidden;
         }
 
-        .station-header {
-            text-align: center;
-            border-bottom: 2px solid var(--army-green);
-            margin-bottom: 30px;
-            width: 100%;
+        /* Urgency Elements */
+        .urgent-overlay {
+            border: 4px solid var(--alert-red);
+            padding: 20px;
+            animation: pulse 2s infinite;
             max-width: 800px;
+            background: rgba(255, 62, 62, 0.05);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: inset 0 0 10px #ff3e3e; }
+            50% { box-shadow: inset 0 0 30px #ff3e3e; }
+            100% { box-shadow: inset 0 0 10px #ff3e3e; }
+        }
+
+        .timer-red {
+            color: var(--alert-red);
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--alert-red);
         }
 
         .enigma-case {
             background: var(--metal);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            border: 5px solid #3d3d3d;
-            max-width: 600px;
+            padding: 30px;
+            border-radius: 4px;
+            border: 2px solid #333;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 700px;
         }
 
         .lampboard {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            gap: 10px;
-            margin-bottom: 30px;
-            background: #111;
-            padding: 20px;
-            border-radius: 5px;
+            gap: 8px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #000;
         }
 
         .key {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
-            border: 2px solid #555;
+            border: 1px solid #444;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
+            font-size: 0.8rem;
             color: #444;
-            transition: all 0.1s;
         }
 
         .key.light-up {
-            background: #ffdf00;
+            background: #fff;
             color: #000;
-            box-shadow: 0 0 15px #ffdf00;
-            border-color: #fff;
+            box-shadow: 0 0 20px #fff;
         }
 
-        .controls {
+        .setting-panel {
             display: flex;
-            gap: 20px;
+            justify-content: space-between;
+            background: #222;
+            padding: 10px;
             margin-bottom: 20px;
-            justify-content: center;
+            border-left: 5px solid var(--alert-red);
         }
 
         input {
-            background: var(--bakelite);
+            background: #000;
             border: 1px solid var(--army-green);
-            color: white;
-            padding: 10px;
+            color: #0f0;
+            padding: 12px;
             font-family: inherit;
-            text-transform: uppercase;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .output-tape {
-            background: var(--paper);
-            color: #222;
-            padding: 15px;
-            margin-top: 20px;
-            min-height: 50px;
             width: 100%;
             box-sizing: border-box;
+        }
+
+        .tape-container {
+            background: #eee;
+            color: #111;
+            padding: 10px;
+            margin-top: 20px;
             font-weight: bold;
-            letter-spacing: 2px;
-            border-left: 5px solid #b1a27e;
+            min-height: 40px;
+            word-break: break-all;
+            border-right: 3px dashed #999;
+        }
+
+        .instruction {
+            font-size: 0.7rem;
+            color: var(--alert-red);
+            text-transform: uppercase;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="station-header">
-        <h1>STATION X: DECRYPTION UNIT</h1>
-        <p>TOP SECRET - FOR AUTHORIZED EYES ONLY</p>
-    </div>
-
-    <div class="enigma-case">
-        <div class="controls">
-            <div>
-                <label>ROTOR POS:</label>
-                <input type="number" id="rotorPos" value="0" min="0" max="25">
-            </div>
+    <div class="urgent-overlay">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="margin:0;">STATION X: INTERCEPT</h1>
+            <div class="timer-red" id="timer">00:00:00</div>
         </div>
+        <p><strong>MISSION:</strong> Match the "Rotor Start" to the daily key. Input the intercepted ciphertext to reveal the plaintext.</p>
 
-        <div class="lampboard" id="lampboard">
+        <div class="enigma-case">
+            <div class="setting-panel">
+                <div>
+                    <label>ROTOR START (0-25):</label>
+                    <input type="number" id="rotorPos" value="0" min="0" max="25">
+                </div>
+                <button onclick="resetMachine()" style="background: var(--alert-red); color: white; border: none; padding: 10px; cursor: pointer;">RESET TAPE</button>
             </div>
 
-        <label>INPUT MESSAGE:</label>
-        <input type="text" id="inputBox" placeholder="TYPE HERE..." autocomplete="off">
-        
-        <div class="output-tape" id="outputTape">
-            OUTPUT: 
+            <div class="lampboard" id="lampboard"></div>
+
+            <label>INPUT CIPHER OR PLAIN TEXT:</label>
+            <input type="text" id="inputBox" placeholder="COMMENCE TYPING..." autocomplete="off">
+            <p class="instruction">Note: Same settings required for both Encryption & Decryption.</p>
+            
+            <div class="tape-container" id="outputTape">TRANSCRIPT: </div>
         </div>
     </div>
 
     <script>
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        // Rotor I wiring
+        const rotorWiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
+        // Reflector B (The secret to bi-directional encoding)
+        const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+
         const lampboard = document.getElementById('lampboard');
         const input = document.getElementById('inputBox');
         const tape = document.getElementById('outputTape');
         const rotorInput = document.getElementById('rotorPos');
 
-        // Simple Rotor Mapping (A static version of Enigma Rotor I)
-        const rotorMap = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
-
-        // Create the lamps
-        alphabet.forEach(char => {
+        // Build Lamps
+        alphabet.split("").forEach(char => {
             const div = document.createElement('div');
             div.className = 'key';
             div.id = `lamp-${char}`;
@@ -146,35 +169,59 @@
             lampboard.appendChild(div);
         });
 
-        input.addEventListener('keyup', (e) => {
-            if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
-                const char = e.key.toUpperCase();
-                const rotorSetting = parseInt(rotorInput.value);
-                
-                // Enigma Logic: Substitution + Rotor Offset
-                let charIndex = alphabet.indexOf(char);
-                let encodedIndex = (charIndex + rotorSetting) % 26;
-                let encodedChar = rotorMap[encodedIndex];
+        function enigmaProcess(char, offset) {
+            let idx = alphabet.indexOf(char);
+            
+            // 1. Into the Rotor (Forward)
+            let shiftedIdx = (idx + offset) % 26;
+            let forwardChar = rotorWiring[shiftedIdx];
+            
+            // 2. Into the Reflector
+            let refIdx = alphabet.indexOf(forwardChar);
+            let reflectedChar = reflector[refIdx];
+            
+            // 3. Back through the Rotor (Reverse)
+            // We find where the reflected char exists in the wiring
+            let revIdx = rotorWiring.indexOf(reflectedChar);
+            let finalIdx = (revIdx - offset + 26) % 26;
+            
+            return alphabet[finalIdx];
+        }
 
-                // Light up lamp
+        input.addEventListener('keypress', (e) => {
+            const char = e.key.toUpperCase();
+            if (alphabet.includes(char)) {
+                const offset = parseInt(rotorInput.value);
+                
+                const result = enigmaProcess(char, offset);
+
+                // Light up
                 document.querySelectorAll('.key').forEach(k => k.classList.remove('light-up'));
-                document.getElementById(`lamp-${encodedChar}`).classList.add('light-up');
+                document.getElementById(`lamp-${result}`).classList.add('light-up');
 
-                // Append to tape
-                tape.innerText += encodedChar;
-                
-                // Increment rotor (The "Level 2" logic)
-                rotorInput.value = (rotorSetting + 1) % 26;
+                // Update tape
+                tape.innerText += result;
+
+                // Move rotor (Automatic stepping)
+                rotorInput.value = (offset + 1) % 26;
             }
+            // Prevent actual text from appearing in the input box so it feels mechanical
+            e.preventDefault(); 
         });
-        
-        // Clear logic for demonstration
-        input.addEventListener('keydown', (e) => {
-            if (e.key === "Backspace") {
-                tape.innerText = "OUTPUT: ";
-                input.value = "";
-            }
-        });
+
+        function resetMachine() {
+            tape.innerText = "TRANSCRIPT: ";
+            input.value = "";
+        }
+
+        // Countdown Timer for Urgency
+        let time = 0;
+        setInterval(() => {
+            time++;
+            let mins = Math.floor(time / 60).toString().padStart(2, '0');
+            let secs = (time % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `00:${mins}:${secs}`;
+        }, 1000);
     </script>
 </body>
 </html>
