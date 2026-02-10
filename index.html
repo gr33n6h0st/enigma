@@ -2,236 +2,224 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ULTRA | ENIGMA M3 OPERATIONAL UNIT</title>
+    <title>ULTRA | ENIGMA M3 SIMULATOR</title>
     <style>
-        :root {
-            --bakelite: #1a1a1a;
-            --brass: #b5a642;
-            --wood: #3d2b1f;
-            --lamp-off: #333;
-            --lamp-on: #fffbe6;
-        }
-
         body {
-            background: #0f0f0f;
+            background-color: #121212;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             font-family: 'Courier New', Courier, monospace;
+            color: #d4d4d4;
         }
 
-        /* The Main Wooden Case */
-        .enigma-machine {
-            background: var(--wood);
-            width: 500px;
+        /* The Main Chassis - Dark Metal/Steel */
+        .machine-body {
+            width: 700px;
+            background: #1a1a1a;
+            border: 12px solid #222;
+            border-bottom: 20px solid #1a1a1a;
+            border-radius: 4px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 40px #000;
             padding: 40px;
-            border-radius: 10px;
-            border: 8px solid #2a1d15;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.5);
-            position: relative;
         }
 
-        /* Rotor Windows */
-        .rotor-section {
+        /* Rotor Windows - Recessed into the metal */
+        .rotor-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            background: #111;
-            padding: 15px;
-            border: 4px inset #333;
+            gap: 15px;
             margin-bottom: 30px;
+            padding: 10px;
+            background: #000;
+            border: 2px inset #333;
+            width: fit-content;
+            margin-inline: auto;
         }
 
-        .rotor-window {
-            background: #eee;
+        .rotor {
+            width: 45px;
+            height: 60px;
+            background: #e0e0e0;
             color: #000;
-            width: 40px;
-            height: 50px;
+            font-size: 2rem;
+            font-weight: 900;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            border-radius: 3px;
-            border: 2px solid #999;
+            border-radius: 2px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
-        /* The Lampboard (Letters that light up) */
+        /* Lampboard - The glowing letters */
         .lampboard {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 40px;
             padding: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 5px;
+            background: #111;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px #000;
         }
 
         .lamp {
-            width: 35px;
-            height: 35px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: var(--bakelite);
-            border: 2px solid #444;
-            color: #555;
+            background: #222;
+            border: 2px solid #333;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            transition: 0.1s;
+            color: #444;
+            transition: 0.05s;
         }
 
-        .lamp.active {
-            background: var(--lamp-on);
+        .lamp.on {
+            background: #fffbe6;
             color: #000;
-            box-shadow: 0 0 25px 5px white;
+            box-shadow: 0 0 25px 5px #fff;
             border-color: #fff;
         }
 
-        /* The Keyboard (Actual typewriter keys) */
+        /* Keys - High contrast black with white text */
         .keyboard {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            gap: 15px;
+            gap: 12px;
         }
 
         .key {
-            width: 38px;
-            height: 38px;
-            background: var(--bakelite);
-            border: 2px solid var(--brass);
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            color: white;
+            background: #000;
+            border: 2px solid #555;
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #000;
-            transition: 0.05s;
-            user-select: none;
-        }
-
-        .key:active, .key.pressed {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #000;
-        }
-
-        /* Output Tape */
-        .tape-feed {
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #d2c5a2;
-            width: 90%;
-            padding: 10px;
-            color: #222;
             font-weight: bold;
-            border-bottom: 2px dashed #999;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            overflow: hidden;
-            white-space: nowrap;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #000;
+            transition: 0.05s;
         }
 
-        /* Invisible input to catch typing */
-        #hidden-input {
-            position: absolute;
-            opacity: 0;
+        .key:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #000;
+        }
+
+        /* The Paper Output Tape */
+        .tape-output {
+            background: #dcd0b0;
+            color: #222;
+            padding: 15px;
+            margin-top: 30px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            min-height: 25px;
+            border-left: 10px solid #b1a27e;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
+            word-break: break-all;
+        }
+
+        .label {
+            font-size: 0.7rem;
+            color: #555;
+            text-align: center;
+            margin-bottom: 5px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <div class="enigma-machine">
-        <div class="tape-feed" id="tape">TRANSCRIPT: </div>
-        
-        <div class="rotor-section">
-            <div class="rotor-window" id="r1">00</div>
+    <div class="machine-body">
+        <div class="label">Rotor Settings</div>
+        <div class="rotor-container">
+            <div class="rotor" id="r-val">00</div>
         </div>
 
-        <div class="lampboard" id="lampboard"></div>
+        <div class="label">Output Lampboard</div>
+        <div class="lampboard" id="lb"></div>
 
-        <div class="keyboard" id="keyboard"></div>
+        <div class="label">Input Keyboard</div>
+        <div class="keyboard" id="kb"></div>
 
-        <input type="text" id="hidden-input" autofocus>
+        <div class="tape-output" id="tape">>> </div>
+        
+        <div class="label" style="margin-top: 20px;">Use physical keyboard | BACKSPACE to reset</div>
     </div>
 
 <script>
-    const alphabet = "QWERTZUIOASDFGHJKPYXCVBNM".split(""); // German QWERTZ layout
+    // Authentic M3 Rotor I and Reflector B wiring
+    const alphabet = "QWERTZUIOASDFGHJKPYXCVBNM".split(""); // Traditional Layout
+    const alphaMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const rotorWiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
     const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     
     let rotorPos = 0;
-    const lampboard = document.getElementById('lampboard');
-    const keyboard = document.getElementById('keyboard');
+
+    const lb = document.getElementById('lb');
+    const kb = document.getElementById('kb');
     const tape = document.getElementById('tape');
-    const r1 = document.getElementById('r1');
-    const hiddenInput = document.getElementById('hidden-input');
+    const rotorDisp = document.getElementById('r-val');
 
-    // Build UI
+    // Create the UI components
     alphabet.forEach(char => {
-        const l = document.createElement('div');
-        l.className = 'lamp';
-        l.id = `lamp-${char}`;
-        l.innerText = char;
-        lampboard.appendChild(l);
-
-        const k = document.createElement('div');
-        k.className = 'key';
-        k.id = `key-${char}`;
-        k.innerText = char;
-        keyboard.appendChild(k);
+        lb.innerHTML += `<div class="lamp" id="L-${char}">${char}</div>`;
+        kb.innerHTML += `<div class="key" id="K-${char}">${char}</div>`;
     });
 
     function encrypt(char) {
-        let idx = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(char);
+        let idx = alphaMap.indexOf(char);
+        if (idx === -1) return null;
+
+        // 1. Rotor Forward
         let shift = (idx + rotorPos) % 26;
         let forward = rotorWiring[shift];
-        let refIdx = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(forward);
+        
+        // 2. Reflector
+        let refIdx = alphaMap.indexOf(forward);
         let reflected = reflector[refIdx];
+        
+        // 3. Rotor Reverse
         let revIdx = rotorWiring.indexOf(reflected);
         let finalIdx = (revIdx - rotorPos + 26) % 26;
-        return "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[finalIdx];
-    }
-
-    function handleInput(char) {
-        if (!"ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(char)) return;
-
-        // Animate key
-        const keyEl = document.getElementById(`key-${char}`);
-        if(keyEl) {
-            keyEl.classList.add('pressed');
-            setTimeout(() => keyEl.classList.remove('pressed'), 100);
-        }
-
-        const result = encrypt(char);
-
-        // Light Lamp
-        document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
-        document.getElementById(`lamp-${result}`).classList.add('active');
-
-        // Update Tape & Rotor
-        tape.innerText += result;
-        rotorPos = (rotorPos + 1) % 26;
-        r1.innerText = rotorPos.toString().padStart(2, '0');
+        
+        return alphaMap[finalIdx];
     }
 
     window.addEventListener('keydown', (e) => {
         const key = e.key.toUpperCase();
+        
         if (key === "BACKSPACE") {
-            tape.innerText = "TRANSCRIPT: ";
+            tape.innerText = ">> ";
             rotorPos = 0;
-            r1.innerText = "00";
-        } else {
-            handleInput(key);
+            rotorDisp.innerText = "00";
+            return;
         }
-    });
 
-    // Mobile/Click support
-    keyboard.addEventListener('mousedown', (e) => {
-        if(e.target.classList.contains('key')) handleInput(e.target.innerText);
+        if (alphaMap.includes(key)) {
+            const result = encrypt(key);
+            
+            // Light the lamp
+            document.querySelectorAll('.lamp').forEach(l => l.classList.remove('on'));
+            const lamp = document.getElementById(`L-${result}`);
+            if (lamp) lamp.classList.add('on');
+
+            // Update paper tape
+            tape.innerText += result;
+            
+            // Step the rotor
+            rotorPos = (rotorPos + 1) % 26;
+            rotorDisp.innerText = rotorPos.toString().padStart(2, '0');
+        }
     });
 </script>
 </body>
