@@ -2,138 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENIGMA M3 | TRUE RECIPROCITY</title>
+    <title>ENIGMA M3 | HARD-WIRED ASSEMBLY</title>
     <style>
-        :root { --rotor: #b8860b; --lamp: #4682b4; --key: #99326b; --plug: #228b22; }
-        body { background: #050505; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Courier New', monospace; perspective: 1500px; }
+        :root { --rotor-y: #b8860b; --lamp-b: #4682b4; --key-p: #99326b; --plug-g: #228b22; }
+        body { background: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Courier New', monospace; color: white; }
         
-        .wood-case { background: #2b1d11; padding: 25px; border: 12px solid #1a110a; transform: rotateX(15deg); box-shadow: 0 80px 150px rgba(0,0,0,0.9); }
-        .chassis { width: 700px; background: #000; display: flex; flex-direction: column; border: 2px solid #333; }
+        .machine-wrap { background: #2b1d11; padding: 20px; border: 10px solid #1a110a; transform: perspective(1000px) rotateX(15deg); box-shadow: 0 50px 100px #000; }
+        .chassis { width: 680px; background: #111; border: 2px solid #333; display: flex; flex-direction: column; }
 
-        /* TIER 1: ROTORS */
-        .tier-rotors { height: 140px; background: var(--rotor); display: flex; justify-content: center; align-items: center; gap: 20px; box-shadow: inset 0 0 40px rgba(0,0,0,0.5); border-bottom: 8px solid #000; position: relative; }
-        .rotor-well { width: 55px; height: 90px; background: #000; border: 4px solid #444; overflow: hidden; position: relative; }
-        .rotor-strip { position: absolute; width: 100%; text-align: center; color: #fff; font-size: 2.5rem; font-weight: 900; line-height: 90px; transition: transform 0.2s; }
-        
-        .reset-btn { position: absolute; right: 20px; background: #c00; color: white; padding: 10px; cursor: pointer; font-weight: bold; border: none; }
+        /* TIERED SECTIONS */
+        .section { position: relative; border-bottom: 10px solid #000; padding: 20px; }
+        .rotors { background: var(--rotor-y); height: 100px; display: flex; justify-content: center; gap: 15px; }
+        .lamps { background: var(--lamp-b); display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; }
+        .keys { background: var(--key-p); display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; border-bottom: none; }
+        .plugs { background: var(--plug-g); padding: 15px; display: flex; flex-direction: column; align-items: center; }
 
-        /* TIER 2 & 3: LAMPS & KEYS */
-        .tier-lamps { background: var(--lamp); display: grid; grid-template-columns: repeat(9, 1fr); padding: 25px; gap: 12px; border-bottom: 15px solid #000; }
-        .tier-keys { background: var(--key); display: grid; grid-template-columns: repeat(9, 1fr); padding: 25px; gap: 12px; border-bottom: 5px solid #000; }
+        /* HARDWARE UI */
+        .rotor-box { width: 50px; height: 70px; background: #000; border: 3px solid #444; color: gold; font-size: 2rem; font-weight: bold; display: flex; justify-content: center; align-items: center; }
+        .bulb { width: 35px; height: 35px; border-radius: 50%; background: #222; border: 2px solid #444; display: flex; justify-content: center; align-items: center; color: #444; font-weight: bold; }
+        .bulb.on { background: #fffbe6; color: #000; box-shadow: 0 0 20px #fff; border-color: #fff; }
+        .key-btn { width: 40px; height: 40px; border-radius: 50%; background: #000; border: 2px solid #ccc; display: flex; justify-content: center; align-items: center; font-weight: bold; }
         
-        .lamp { width: 40px; height: 40px; border-radius: 50%; background: #111; border: 2px solid #333; color: #444; display: flex; justify-content: center; align-items: center; font-weight: bold; }
-        .lamp.active { background: #fffbe6; color: #000; box-shadow: 0 0 30px 5px white, inset 0 0 10px gold; }
-        
-        .key { width: 45px; height: 45px; border-radius: 50%; background: #000; border: 2px solid #ccc; color: #fff; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 6px 0 #111; cursor: pointer; }
-        .key:active { transform: translateY(6px); box-shadow: 0 0 0 #000; }
-
-        /* FRONT FACE */
-        .tier-plugs { background: var(--plug); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #plug-in { background: #000; border: 1px solid #0f0; color: #0f0; width: 85%; padding: 10px; text-transform: uppercase; letter-spacing: 4px; }
-        
-        .tape { background: #fdf5e6; color: #222; padding: 15px; margin-bottom: 20px; font-weight: 900; border-left: 10px solid #dcdcdc; min-height: 1.2em; cursor: pointer; }
+        #plugboard { background: #000; color: #0f0; border: 1px solid #0f0; width: 80%; padding: 8px; text-transform: uppercase; letter-spacing: 2px; }
+        .tape { background: #fdf5e6; color: #000; width: 640px; padding: 15px; margin-bottom: 10px; font-weight: bold; border-left: 10px solid #ccc; min-height: 1.2em; }
+        .reset-btn { background: #a00; color: white; border: none; padding: 10px; cursor: pointer; margin-left: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="wood-case">
-    <div class="tape" id="tape" title="Click to Clear">>> </div>
+<div class="tape" id="output-tape">>> </div>
+
+<div class="machine-wrap">
     <div class="chassis">
-        <div class="tier-rotors">
-            <div class="rotor-well"><div class="rotor-strip" id="r3"></div></div>
-            <div class="rotor-well"><div class="rotor-strip" id="r2"></div></div>
-            <div class="rotor-well"><div class="rotor-strip" id="r1"></div></div>
-            <button class="reset-btn" onclick="fullReset()">RESET ALL</button>
+        <div class="section rotors">
+            <div class="rotor-box" id="disp-2">A</div>
+            <div class="rotor-box" id="disp-1">A</div>
+            <div class="rotor-box" id="disp-0">A</div>
+            <button class="reset-btn" onclick="resetEnigma()">RESET</button>
         </div>
-        <div class="tier-lamps" id="lb"></div>
-        <div class="tier-keys" id="kb"></div>
-        <div class="tier-plugs">
-            <input type="text" id="plug-in" placeholder="STECKERBRETT PAIRS (AB XY...)">
+
+        <div class="section lamps" id="lamp-grid"></div>
+        <div class="section keys" id="key-grid"></div>
+
+        <div class="section plugs">
+            <input type="text" id="plugboard" placeholder="PAIRS (E.G. AZ BY)">
         </div>
     </div>
 </div>
 
 <script>
-    const alphabet = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
-    const alphaMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const rotorWiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ"; // Rotor I
-    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT"; // Reflector B
+    const chars = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const rotorI = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
+    const reflectorB = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     
-    let pos = [0, 0, 0]; // [Right, Middle, Left]
+    let pos = [0, 0, 0]; // R, M, L
 
-    function init() {
-        alphabet.forEach(char => {
-            document.getElementById('lb').innerHTML += `<div class="lamp" id="L-${char}">${char}</div>`;
-            document.getElementById('kb').innerHTML += `<div class="key" id="K-${char}">${char}</div>`;
-        });
-        updateUI();
-    }
+    // Build UI
+    chars.forEach(c => {
+        document.getElementById('lamp-grid').innerHTML += `<div class="bulb" id="L-${c}">${c}</div>`;
+        document.getElementById('key-grid').innerHTML += `<div class="key-btn" id="K-${c}">${c}</div>`;
+    });
 
-    function updateUI() {
-        [1,2,3].forEach((num, i) => {
-            const s = document.getElementById(`r${num}`);
-            s.innerHTML = '';
-            alphaMap.split("").forEach(l => s.innerHTML += `<div>${l}</div>`);
-            s.style.transform = `translateY(-${pos[i] * 90}px)`;
-        });
-    }
-
-    function fullReset() {
+    function resetEnigma() {
         pos = [0, 0, 0];
-        document.getElementById('tape').innerText = ">> ";
-        updateUI();
+        document.getElementById('output-tape').innerText = ">> ";
+        updateDisplay();
     }
 
-    document.getElementById('tape').onclick = () => document.getElementById('tape').innerText = ">> ";
+    function updateDisplay() {
+        pos.forEach((v, i) => {
+            document.getElementById(`disp-${i}`).innerText = alphabet[v];
+        });
+    }
 
     function getPlug(c) {
-        const pairs = document.getElementById('plug-in').value.toUpperCase().split(" ");
-        for (let p of pairs) if (p.length === 2) {
-            if (p[0] === c) return p[1];
-            if (p[1] === c) return p[0];
+        const val = document.getElementById('plugboard').value.toUpperCase();
+        const pairs = val.split(" ");
+        for (let p of pairs) {
+            if (p.length === 2) {
+                if (p[0] === c) return p[1];
+                if (p[1] === c) return p[0];
+            }
         }
         return c;
     }
 
-    function runLogic(char) {
-        // 1. Step Rotor first (Enigma mechanic)
+    function step() {
         pos[0] = (pos[0] + 1) % 26;
         if (pos[0] === 0) pos[1] = (pos[1] + 1) % 26;
-        updateUI();
+        if (pos[1] === 0 && pos[0] === 0) pos[2] = (pos[2] + 1) % 26;
+        updateDisplay();
+    }
 
-        // 2. Encryption Path
-        let p = getPlug(char);
-        let i = alphaMap.indexOf(p);
+    function encrypt(c) {
+        step();
+        let char = getPlug(c);
         
-        // Rotor Entry
-        let shift = (i + pos[0]) % 26;
-        let contact = rotorWiring[shift];
+        // Forward through Rotor I
+        let idx = (alphabet.indexOf(char) + pos[0]) % 26;
+        let wireOut = rotorI[idx];
+        let contactIdx = (alphabet.indexOf(wireOut) - pos[0] + 26) % 26;
         
         // Reflector
-        let ref = reflector[alphaMap.indexOf(contact)];
+        let refChar = reflectorB[contactIdx];
         
-        // Rotor Return
-        let revIdx = rotorWiring.indexOf(ref);
-        let finalIdx = (revIdx - pos[0] + 26) % 26;
+        // Reverse through Rotor I
+        let revIdx = (alphabet.indexOf(refChar) + pos[0]) % 26;
+        let revWireOut = alphabet[rotorI.indexOf(alphabet[revIdx])];
+        let finalIdx = (alphabet.indexOf(revWireOut) - pos[0] + 26) % 26;
         
-        return getPlug(alphaMap[finalIdx]);
+        return getPlug(alphabet[finalIdx]);
     }
 
     window.addEventListener('keydown', (e) => {
-        const k = e.key.toUpperCase();
-        if (alphaMap.includes(k) && e.target.tagName !== 'INPUT') {
-            const out = runLogic(k);
-            document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
-            document.getElementById(`L-${out}`).classList.add('active');
-            document.getElementById('tape').innerText += out;
+        const key = e.key.toUpperCase();
+        if (alphabet.includes(key) && e.target.tagName !== 'INPUT') {
+            const result = encrypt(key);
+            
+            // Light Lamp
+            document.querySelectorAll('.bulb').forEach(b => b.classList.remove('on'));
+            const bulb = document.getElementById(`L-${result}`);
+            if (bulb) bulb.classList.add('on');
+            
+            // Write Tape
+            document.getElementById('output-tape').innerText += result;
         }
     });
 
     window.addEventListener('keyup', () => {
-        document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.bulb').forEach(b => b.classList.remove('on'));
     });
-
-    init();
 </script>
 </body>
 </html>
