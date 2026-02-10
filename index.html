@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENIGMA M3 | DUAL-PURPOSE ASSEMBLY</title>
+    <title>ENIGMA M3 | TRUE RECIPROCITY</title>
     <style>
         :root { --rotor: #b8860b; --lamp: #4682b4; --key: #99326b; --plug: #228b22; }
         body { background: #050505; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: 'Courier New', monospace; perspective: 1500px; }
@@ -10,14 +10,15 @@
         .wood-case { background: #2b1d11; padding: 25px; border: 12px solid #1a110a; transform: rotateX(15deg); box-shadow: 0 80px 150px rgba(0,0,0,0.9); }
         .chassis { width: 700px; background: #000; display: flex; flex-direction: column; border: 2px solid #333; }
 
-        /* TIER 1: ROTORS + RESET */
+        /* TIER 1: ROTORS */
         .tier-rotors { height: 140px; background: var(--rotor); display: flex; justify-content: center; align-items: center; gap: 20px; box-shadow: inset 0 0 40px rgba(0,0,0,0.5); border-bottom: 8px solid #000; position: relative; }
-        .rotor-well { width: 55px; height: 90px; background: #000; border: 4px solid #444; overflow: hidden; position: relative; cursor: ns-resize; }
-        .rotor-strip { position: absolute; width: 100%; text-align: center; color: #fff; font-size: 2.5rem; font-weight: 900; line-height: 90px; pointer-events: none; transition: transform 0.2s; }
-        .reset-lever { position: absolute; right: 20px; background: #444; color: white; padding: 10px; cursor: pointer; border: 2px solid #666; font-size: 0.7rem; }
+        .rotor-well { width: 55px; height: 90px; background: #000; border: 4px solid #444; overflow: hidden; position: relative; }
+        .rotor-strip { position: absolute; width: 100%; text-align: center; color: #fff; font-size: 2.5rem; font-weight: 900; line-height: 90px; transition: transform 0.2s; }
+        
+        .reset-btn { position: absolute; right: 20px; background: #c00; color: white; padding: 10px; cursor: pointer; font-weight: bold; border: none; }
 
         /* TIER 2 & 3: LAMPS & KEYS */
-        .tier-lamps { background: var(--lamp); display: grid; grid-template-columns: repeat(9, 1fr); padding: 25px; gap: 12px; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); border-bottom: 15px solid #000; }
+        .tier-lamps { background: var(--lamp); display: grid; grid-template-columns: repeat(9, 1fr); padding: 25px; gap: 12px; border-bottom: 15px solid #000; }
         .tier-keys { background: var(--key); display: grid; grid-template-columns: repeat(9, 1fr); padding: 25px; gap: 12px; border-bottom: 5px solid #000; }
         
         .lamp { width: 40px; height: 40px; border-radius: 50%; background: #111; border: 2px solid #333; color: #444; display: flex; justify-content: center; align-items: center; font-weight: bold; }
@@ -28,21 +29,21 @@
 
         /* FRONT FACE */
         .tier-plugs { background: var(--plug); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #plug-in { background: #000; border: 1px solid #0f0; color: #0f0; width: 85%; padding: 10px; font-family: inherit; letter-spacing: 4px; }
+        #plug-in { background: #000; border: 1px solid #0f0; color: #0f0; width: 85%; padding: 10px; text-transform: uppercase; letter-spacing: 4px; }
         
-        .tape { background: #fdf5e6; color: #222; padding: 15px; margin-bottom: 20px; font-weight: 900; border-left: 10px solid #dcdcdc; min-height: 1.2em; overflow-wrap: break-word; }
+        .tape { background: #fdf5e6; color: #222; padding: 15px; margin-bottom: 20px; font-weight: 900; border-left: 10px solid #dcdcdc; min-height: 1.2em; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="wood-case">
-    <div class="tape" id="tape">OUTPUT >> </div>
+    <div class="tape" id="tape" title="Click to Clear">>> </div>
     <div class="chassis">
         <div class="tier-rotors">
-            <div class="rotor-well" onclick="stepRotor(2)"><div class="rotor-strip" id="r3"></div></div>
-            <div class="rotor-well" onclick="stepRotor(1)"><div class="rotor-strip" id="r2"></div></div>
-            <div class="rotor-well" onclick="stepRotor(0)"><div class="rotor-strip" id="r1"></div></div>
-            <div class="reset-lever" onclick="resetMachine()">RESET ROTORS</div>
+            <div class="rotor-well"><div class="rotor-strip" id="r3"></div></div>
+            <div class="rotor-well"><div class="rotor-strip" id="r2"></div></div>
+            <div class="rotor-well"><div class="rotor-strip" id="r1"></div></div>
+            <button class="reset-btn" onclick="fullReset()">RESET ALL</button>
         </div>
         <div class="tier-lamps" id="lb"></div>
         <div class="tier-keys" id="kb"></div>
@@ -55,37 +56,35 @@
 <script>
     const alphabet = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
     const alphaMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const rotorWiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
-    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
-    let rotorPos = [0, 0, 0];
+    const rotorWiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ"; // Rotor I
+    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT"; // Reflector B
+    
+    let pos = [0, 0, 0]; // [Right, Middle, Left]
 
     function init() {
         alphabet.forEach(char => {
             document.getElementById('lb').innerHTML += `<div class="lamp" id="L-${char}">${char}</div>`;
             document.getElementById('kb').innerHTML += `<div class="key" id="K-${char}">${char}</div>`;
         });
-        updateRotorUI();
+        updateUI();
     }
 
-    function updateRotorUI() {
+    function updateUI() {
         [1,2,3].forEach((num, i) => {
             const s = document.getElementById(`r${num}`);
             s.innerHTML = '';
             alphaMap.split("").forEach(l => s.innerHTML += `<div>${l}</div>`);
-            s.style.transform = `translateY(-${rotorPos[i] * 90}px)`;
+            s.style.transform = `translateY(-${pos[i] * 90}px)`;
         });
     }
 
-    function stepRotor(idx) {
-        rotorPos[idx] = (rotorPos[idx] + 1) % 26;
-        updateRotorUI();
+    function fullReset() {
+        pos = [0, 0, 0];
+        document.getElementById('tape').innerText = ">> ";
+        updateUI();
     }
 
-    function resetMachine() {
-        rotorPos = [0, 0, 0];
-        updateRotorUI();
-        document.getElementById('tape').innerText = "OUTPUT >> ";
-    }
+    document.getElementById('tape').onclick = () => document.getElementById('tape').innerText = ">> ";
 
     function getPlug(c) {
         const pairs = document.getElementById('plug-in').value.toUpperCase().split(" ");
@@ -96,20 +95,34 @@
         return c;
     }
 
-    function crypt(c) {
-        let char = getPlug(c);
-        let idx = (alphaMap.indexOf(char) + rotorPos[0]) % 26;
-        let out = getPlug(alphaMap[rotorWiring.indexOf(reflector[alphaMap.indexOf(rotorWiring[idx])])]);
+    function runLogic(char) {
+        // 1. Step Rotor first (Enigma mechanic)
+        pos[0] = (pos[0] + 1) % 26;
+        if (pos[0] === 0) pos[1] = (pos[1] + 1) % 26;
+        updateUI();
+
+        // 2. Encryption Path
+        let p = getPlug(char);
+        let i = alphaMap.indexOf(p);
         
-        rotorPos[0] = (rotorPos[0] + 1) % 26; // Auto-step
-        updateRotorUI();
-        return out;
+        // Rotor Entry
+        let shift = (i + pos[0]) % 26;
+        let contact = rotorWiring[shift];
+        
+        // Reflector
+        let ref = reflector[alphaMap.indexOf(contact)];
+        
+        // Rotor Return
+        let revIdx = rotorWiring.indexOf(ref);
+        let finalIdx = (revIdx - pos[0] + 26) % 26;
+        
+        return getPlug(alphaMap[finalIdx]);
     }
 
     window.addEventListener('keydown', (e) => {
         const k = e.key.toUpperCase();
-        if (alphaMap.includes(k)) {
-            const out = crypt(k);
+        if (alphaMap.includes(k) && e.target.tagName !== 'INPUT') {
+            const out = runLogic(k);
             document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
             document.getElementById(`L-${out}`).classList.add('active');
             document.getElementById('tape').innerText += out;
