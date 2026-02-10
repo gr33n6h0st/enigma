@@ -2,205 +2,214 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENIGMA M3 | TIERED ASSEMBLY</title>
+    <title>ENIGMA M3 | FINAL ASSEMBLY</title>
     <style>
-        :root {
-            --metal: #121212;
-            --rotor-gold: rgba(184, 134, 11, 0.4);
-            --lamp-blue: rgba(70, 130, 180, 0.4);
-            --key-pink: rgba(153, 50, 107, 0.4);
-            --plug-green: rgba(34, 139, 34, 0.4);
-        }
-
         body {
-            background-color: #050505;
+            background: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            perspective: 2000px;
             font-family: 'Courier New', monospace;
+            perspective: 1500px;
         }
 
-        /* The 3D Chassis - This creates the "Staircase" effect */
-        .enigma-machine {
-            width: 700px;
-            transform-style: preserve-3d;
-            transform: rotateX(25deg) rotateY(-5deg);
-        }
-
-        /* General Tier Styling */
-        .tier {
+        /* The main machine body - Solid and connected */
+        .enigma-body {
             position: relative;
-            width: 100%;
-            background: var(--metal);
-            border: 2px solid #333;
-            box-shadow: inset 0 0 50px #000;
+            width: 700px;
+            background: #1a1a1a;
+            transform: rotateX(20deg);
+            border: 10px solid #222;
+            box-shadow: 0 50px 100px #000;
+        }
+
+        /* Connecting Riser - The vertical wall between tiers */
+        .riser {
+            height: 20px;
+            background: linear-gradient(to bottom, #000, #222);
+            border-top: 1px solid #444;
+        }
+
+        /* Tier 1: ROTORS (Yellow Top) */
+        .tier-rotors {
+            background: #b8860b;
+            height: 140px;
             display: flex;
             justify-content: center;
             align-items: center;
-        }
-
-        /* TOP STEP: ROTORS (Yellow Area) */
-        .tier-rotors {
-            height: 120px;
-            background: linear-gradient(to bottom, #1a1a1a, var(--rotor-gold));
             gap: 20px;
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.5);
         }
 
         .rotor-window {
-            width: 50px;
-            height: 80px;
-            background: #000;
-            border: 3px solid #555;
-            overflow: hidden;
-            border-radius: 4px;
+            width: 55px; height: 90px; background: #000;
+            border: 4px solid #333; overflow: hidden; position: relative;
         }
 
         .rotor-strip {
-            color: #eee;
-            font-size: 2.2rem;
-            font-weight: 900;
-            text-align: center;
-            line-height: 80px;
-            transition: transform 0.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+            position: absolute; width: 100%; text-align: center;
+            color: #fff; font-size: 2.5rem; font-weight: 900; line-height: 90px;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* MIDDLE STEP: LAMPS (Blue Area) */
+        /* Tier 2: LAMPS (Blue Step) */
         .tier-lamps {
-            height: 180px;
-            background: linear-gradient(to bottom, #1a1a1a, var(--lamp-blue));
+            background: #4682b4;
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            padding: 20px;
-            gap: 10px;
-            /* This transform creates the "step" down from the rotors */
-            transform: translateZ(30px) translateY(-5px); 
-            box-shadow: 0 10px 30px #000;
+            padding: 25px;
+            gap: 12px;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.4);
         }
 
         .lamp {
-            width: 40px; height: 40px; border-radius: 50%; background: #080808;
-            border: 2px solid #222; color: #333; display: flex; 
+            width: 40px; height: 40px; border-radius: 50%; background: #111;
+            border: 2px solid #222; color: #333; display: flex;
             justify-content: center; align-items: center; font-weight: bold;
         }
 
         .lamp.lit {
             background: #fffbe6; color: #000;
-            box-shadow: 0 0 25px 5px white, inset 0 0 10px gold;
+            box-shadow: 0 0 30px 10px white, inset 0 0 10px gold;
         }
 
-        /* BOTTOM STEP: KEYBOARD (Pink Area) */
+        /* Tier 3: KEYBOARD (Pink Step) */
         .tier-keys {
-            height: 180px;
-            background: linear-gradient(to bottom, #1a1a1a, var(--key-pink));
+            background: #99326b;
             display: grid;
             grid-template-columns: repeat(9, 1fr);
-            padding: 20px;
-            gap: 10px;
-            /* Stepping further down and forward */
-            transform: translateZ(60px) translateY(-10px);
-            box-shadow: 0 15px 40px #000;
+            padding: 25px;
+            gap: 12px;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.4);
         }
 
         .key {
             width: 45px; height: 45px; border-radius: 50%; background: #000;
-            border: 2px solid #ccc; color: #fff; display: flex;
+            border: 2px solid #eee; color: #fff; display: flex;
             justify-content: center; align-items: center; font-weight: bold;
-            box-shadow: 0 6px 0 #111; cursor: pointer; transition: 0.05s;
+            box-shadow: 0 6px 0 #111; cursor: pointer;
         }
 
         .key:active { transform: translateY(6px); box-shadow: 0 0 0 #000; }
 
-        /* FRONT FACE: PLUGBOARD (Green Area) */
-        .tier-plugs {
-            height: 100px;
-            background: var(--plug-green);
-            /* Rotating 90 degrees to face the user vertically */
-            transform: rotateX(-90deg) translateZ(50px) translateY(50px);
+        /* Tier 4: PLUGBOARD (The vertical front face) */
+        .front-face {
+            background: #228b22;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             border-top: 5px solid #111;
         }
 
-        #plug-input {
+        #plug-wiring {
             background: #000; border: 1px solid #0f0; color: #0f0;
-            width: 80%; padding: 10px; font-family: inherit; letter-spacing: 2px;
+            width: 85%; padding: 12px; font-family: inherit; letter-spacing: 4px;
         }
 
+        /* Paper Output Strip */
         .tape {
-            position: fixed; top: 20px; right: 20px; background: #e6e0ca;
-            padding: 20px; width: 200px; color: #222; font-weight: 900;
-            box-shadow: 5px 5px 20px rgba(0,0,0,0.5); border-left: 8px solid #b1a27e;
+            position: absolute; top: -50px; right: 20px;
+            background: #fdf5e6; padding: 15px; width: 250px;
+            font-weight: 900; border-left: 10px solid #dcdcdc;
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.8);
         }
     </style>
 </head>
 <body>
 
-<div class="tape" id="tape">>> </div>
+    <div class="enigma-body">
+        <div class="tape" id="tape">>> </div>
 
-<div class="enigma-machine">
-    <div class="tier tier-rotors">
-        <div class="rotor-window"><div class="rotor-strip" id="r3"></div></div>
-        <div class="rotor-window"><div class="rotor-strip" id="r2"></div></div>
-        <div class="rotor-window"><div class="rotor-strip" id="r1"></div></div>
+        <div class="tier-rotors">
+            <div class="rotor-window"><div class="rotor-strip" id="r3"></div></div>
+            <div class="rotor-window"><div class="rotor-strip" id="r2"></div></div>
+            <div class="rotor-window"><div class="rotor-strip" id="r1"></div></div>
+        </div>
+
+        <div class="riser"></div>
+
+        <div class="tier-lamps" id="lampboard"></div>
+
+        <div class="riser"></div>
+
+        <div class="tier-keys" id="keyboard"></div>
+
+        <div class="front-face">
+            <div style="color: white; font-size: 0.7rem; margin-bottom: 5px;">STECKERBRETT (FRONT PANEL)</div>
+            <input type="text" id="plug-wiring" placeholder="PAIRS: AB XY...">
+        </div>
     </div>
-
-    <div class="tier tier-lamps" id="lampboard"></div>
-
-    <div class="tier tier-keys" id="keyboard"></div>
-
-    <div class="tier tier-plugs">
-        <input type="text" id="plug-input" placeholder="PLUGBOARD PAIRS (AB XY)">
-    </div>
-</div>
 
 <script>
     const alphabet = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
-    const standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const wiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
+    const alphaMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const rotorWiring = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
     const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     
-    let p1 = 0, p2 = 0;
+    let r1 = 0, r2 = 0;
 
-    // Init UI
+    // Build Boards
+    const lb = document.getElementById('lampboard');
+    const kb = document.getElementById('keyboard');
     alphabet.forEach(char => {
-        document.getElementById('lampboard').innerHTML += `<div class="lamp" id="L-${char}">${char}</div>`;
-        document.getElementById('keyboard').innerHTML += `<div class="key" id="K-${char}">${char}</div>`;
+        lb.innerHTML += `<div class="lamp" id="L-${char}">${char}</div>`;
+        kb.innerHTML += `<div class="key" id="K-${char}">${char}</div>`;
     });
 
+    // Load Rotor Strips
     [1,2,3].forEach(i => {
         const s = document.getElementById(`r${i}`);
-        standard.split("").forEach(l => s.innerHTML += `<div>${l}</div>`);
+        alphaMap.split("").forEach(l => s.innerHTML += `<div>${l}</div>`);
     });
 
     function getPlug(c) {
-        const p = document.getElementById('plug-input').value.toUpperCase().split(" ");
-        for (let pair of p) {
-            if (pair.length === 2) {
-                if (pair[0] === c) return pair[1];
-                if (pair[1] === c) return pair[0];
+        const pairs = document.getElementById('plug-wiring').value.toUpperCase().split(" ");
+        for (let p of pairs) {
+            if (p.length === 2) {
+                if (p[0] === c) return p[1];
+                if (p[1] === c) return p[0];
             }
         }
         return c;
     }
 
+    function encrypt(char) {
+        let input = getPlug(char);
+        let idx = alphaMap.indexOf(input);
+        
+        // Pass 1: Forward
+        let shift = (idx + r1) % 26;
+        let pass = rotorWiring[shift];
+        let ref = reflector[alphaMap.indexOf(pass)];
+        let rev = rotorWiring.indexOf(ref);
+        let final = (rev - r1 + 26) % 26;
+        
+        return getPlug(alphaMap[final]);
+    }
+
     window.addEventListener('keydown', (e) => {
         const k = e.key.toUpperCase();
-        if (standard.includes(k)) {
-            // Logic
-            let char = getPlug(k);
-            let idx = (standard.indexOf(char) + p1) % 26;
-            let out = getPlug(standard[wiring.indexOf(reflector[standard.indexOf(wiring[idx])])]);
+        if (alphaMap.includes(k)) {
+            const out = encrypt(k);
             
-            // Interaction
+            // Lamp Feedback
             document.querySelectorAll('.lamp').forEach(l => l.classList.remove('lit'));
             const lEl = document.getElementById(`L-${out}`);
             if (lEl) lEl.classList.add('lit');
+            
             document.getElementById('tape').innerText += out;
 
-            // Animate Rotors
-            p1 = (p1 + 1) % 26;
-            document.getElementById('r1').style.transform = `translateY(-${p1 * 80}px)`;
+            // Physical Rotor Rotation
+            r1 = (r1 + 1) % 26;
+            document.getElementById('r1').style.transform = `translateY(-${r1 * 90}px)`;
+            if (r1 === 0) {
+                r2 = (r2 + 1) % 26;
+                document.getElementById('r2').style.transform = `translateY(-${r2 * 90}px)`;
+            }
         }
     });
 
