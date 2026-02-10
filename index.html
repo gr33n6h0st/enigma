@@ -1,214 +1,221 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ENIGMA M3 | DIRECT INPUT</title>
+    <meta charset="UTF-8">
+    <title>Enigma M3 | Bulk Translator</title>
     <style>
-        body { 
-            background: #222; 
-            color: #eee; 
-            font-family: monospace; 
-            padding: 40px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-        }
-
-        h1 { margin-bottom: 10px; color: gold; }
-
-        .machine-container {
-            background: #333;
-            padding: 30px;
-            border: 5px solid #555;
-            border-radius: 10px;
-            width: 600px;
+        body {
+            background-color: #121212;
+            color: #ccc;
+            font-family: 'Courier New', monospace;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        .rotor-display {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
-            background: #111;
-            border: 2px solid gold;
-            margin-bottom: 10px;
         }
 
-        .rotor-val {
-            font-size: 3rem;
-            color: gold;
-            font-weight: bold;
-            width: 60px;
-            text-align: center;
-            border-bottom: 2px solid #555;
+        h2 { color: #d4af37; text-transform: uppercase; letter-spacing: 2px; }
+
+        .settings-bar {
+            background: #1e1e1e;
+            padding: 15px 30px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .io-group {
+        .rotor-select {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            align-items: center;
         }
 
-        label { font-weight: bold; color: #aaa; }
-
-        /* THE INPUT BOX - This guarantees input is captured */
-        input[type="text"] {
+        .rotor-select label { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-weight: bold; }
+        
+        select {
             background: #000;
-            color: #0f0;
-            font-family: monospace;
+            color: #d4af37;
+            font-family: inherit;
             font-size: 1.5rem;
-            padding: 15px;
-            border: 2px solid #0f0;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .output-box {
-            background: #ddd;
-            color: #000;
-            font-family: monospace;
-            font-size: 1.5rem;
-            padding: 15px;
-            border: 2px solid #fff;
-            letter-spacing: 3px;
-            min-height: 1.5em;
-            font-weight: bold;
-        }
-
-        button {
-            padding: 15px;
-            background: #c00;
-            color: white;
-            border: none;
-            font-size: 1.2rem;
+            padding: 5px 15px;
+            border: 2px solid #444;
             cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
+            border-radius: 4px;
         }
 
-        button:hover { background: #f00; }
+        .translator-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            height: 400px;
+        }
+
+        .text-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+            letter-spacing: 1px;
+        }
+
+        textarea {
+            flex: 1;
+            background: #080808;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        textarea:focus { border-color: #d4af37; background: #000; }
+        #output-text { color: #d4af37; }
     </style>
 </head>
 <body>
 
-    <h1>ENIGMA M3 DIRECT</h1>
+    <h2>Enigma M3 Translator</h2>
 
-    <div class="machine-container">
-        <div class="rotor-display">
-            <div class="rotor-val" id="r2">A</div>
-            <div class="rotor-val" id="r1">A</div>
-            <div class="rotor-val" id="r0">A</div>
+    <div class="settings-bar">
+        <div class="rotor-select">
+            <label>LEFT</label>
+            <select id="r1" onchange="runEnigma()"></select>
         </div>
-
-        <div class="io-group">
-            <label>TYPE MESSAGE HERE:</label>
-            <input type="text" id="input-source" placeholder="CLICK AND TYPE..." oninput="handleTyping(this)" autocomplete="off">
+        <div class="rotor-select">
+            <label>MIDDLE</label>
+            <select id="r2" onchange="runEnigma()"></select>
         </div>
-
-        <div class="io-group">
-            <label>ENCRYPTED OUTPUT:</label>
-            <div class="output-box" id="output-dest"></div>
+        <div class="rotor-select">
+            <label>RIGHT</label>
+            <select id="r3" onchange="runEnigma()"></select>
         </div>
+    </div>
 
-        <button onclick="resetMachine()">RESET ROTORS (START OVER)</button>
+    <div class="translator-container">
+        <div class="text-panel">
+            <div class="panel-header">INPUT</div>
+            <textarea id="input-text" placeholder="Paste text here..." oninput="runEnigma()"></textarea>
+        </div>
+        
+        <div class="text-panel">
+            <div class="panel-header">OUTPUT</div>
+            <textarea id="output-text" readonly></textarea>
+        </div>
     </div>
 
 <script>
-    // Configuration: Rotor I, Reflector B
-    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const rotorI = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
-    const reflB  = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
-    
-    let offset = 0; // Single rotor for simplicity and reliability first
-    // (If this works, we can add the 2nd and 3rd rotors back easily)
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    // Standard M3 Rotors (I, II, III) and Reflector B
+    const rotors = {
+        I:   "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
+        II:  "AJDKSIRUXBLHWTMCQGZNPYFVOE",
+        III: "BDFHJLCPRTXVZNYEIWGAKMUSQO"
+    };
+    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT"; 
 
-    // Using a simpler single-rotor logic first to GUARANTEE output
-    // If you need 3 rotors, I can enable them, but let's get ONE working first.
-    // Wait, M3 requires 3. I will implement the loop for 1 rotor for now to PROVE throughput,
-    // then the Reciprocity will work on that single rotor perfectly.
-    
-    // UPDATE: Users expect M3. I will use the verified M3 logic from my "Nuclear" thought process.
-    let offsets = [0, 0, 0]; 
-
-    function resetMachine() {
-        offsets = [0, 0, 0];
-        document.getElementById('input-source').value = "";
-        document.getElementById('output-dest').innerText = "";
-        updateRotors();
-        document.getElementById('input-source').focus();
+    // Initialize Dropdowns
+    function init() {
+        const selects = ['r1', 'r2', 'r3'];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            for(let i=0; i<26; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.text = alphabet[i];
+                el.appendChild(opt);
+            }
+        });
+        // Default to A A A
+        document.getElementById('r1').value = 0;
+        document.getElementById('r2').value = 0;
+        document.getElementById('r3').value = 0;
     }
 
-    function updateRotors() {
-        document.getElementById('r0').innerText = alpha[offsets[0]]; // Right
-        document.getElementById('r1').innerText = alpha[offsets[1]]; // Mid
-        document.getElementById('r2').innerText = alpha[offsets[2]]; // Left
-    }
+    function runEnigma() {
+        // 1. Get Start Settings
+        let p1 = parseInt(document.getElementById('r1').value); // Left
+        let p2 = parseInt(document.getElementById('r2').value); // Mid
+        let p3 = parseInt(document.getElementById('r3').value); // Right
 
-    function handleTyping(el) {
-        // Get the last character typed
-        let val = el.value.toUpperCase();
-        
-        // If user deleted text, reset (simplest way to handle backspace in this simple emulator)
-        if (val.length === 0) {
-            document.getElementById('output-dest').innerText = "";
-            return;
+        const input = document.getElementById('input-text').value.toUpperCase();
+        let output = "";
+
+        // 2. Loop through every character in the box
+        for (let i = 0; i < input.length; i++) {
+            let char = input[i];
+
+            if (alphabet.includes(char)) {
+                // Step Rotors (Right always steps)
+                p3 = (p3 + 1) % 26;
+                // If Right wraps A->Z, step Mid
+                if (p3 === 0) {
+                    p2 = (p2 + 1) % 26;
+                    // If Mid wraps A->Z, step Left
+                    if (p2 === 0) {
+                        p1 = (p1 + 1) % 26;
+                    }
+                }
+
+                // --- SIGNAL PATH ---
+                // Forward (Right -> Mid -> Left)
+                let c1 = forward(char, p3, rotors.III);
+                let c2 = forward(c1,   p2, rotors.II);
+                let c3 = forward(c2,   p1, rotors.I);
+
+                // Reflector
+                let refIdx = alphabet.indexOf(c3);
+                let reflected = reflector[refIdx];
+
+                // Backward (Left -> Mid -> Right)
+                let c4 = backward(reflected, p1, rotors.I);
+                let c5 = backward(c4,        p2, rotors.II);
+                let c6 = backward(c5,        p3, rotors.III);
+
+                output += c6;
+            } else {
+                // Keep spaces/numbers
+                output += char; 
+            }
         }
-
-        // Only process the NEWEST character
-        let lastChar = val.slice(-1);
-        
-        // If it's not a letter, ignore it
-        if (!alpha.includes(lastChar)) return;
-
-        // Process logic
-        let encrypted = enigmaLogic(lastChar);
-        
-        // Append to output
-        document.getElementById('output-dest').innerText += encrypted;
+        document.getElementById('output-text').value = output;
     }
 
-    function enigmaLogic(char) {
-        // 1. Step Rotors (Right Fast Rotor)
-        offsets[0] = (offsets[0] + 1) % 26;
-        if (offsets[0] === 0) offsets[1] = (offsets[1] + 1) % 26; // Simple carry
-        updateRotors();
-
-        // 2. Forward Pass
-        // ROTOR I (Right)
-        let idx = alpha.indexOf(char);
-        let r1_in = (idx + offsets[0]) % 26;
-        let r1_out = rotorI[r1_in];
-        let r1_handover = (alpha.indexOf(r1_out) - offsets[0] + 26) % 26;
-
-        // REFLECTOR B (Middle - ignoring other rotors for a 1-rotor simplified M3 test to ensure reciprocal success)
-        // Wait, if I skip rotors 2/3, it's not M3. 
-        // I will implement FULL 3-ROTOR PATH below to satisfy the prompt.
-        
-        // --- RESTARTING PATH FOR FULL 3-ROTOR ACCURACY ---
-        
-        // Input -> Rotor 1 (Right)
-        let idx0 = (alpha.indexOf(char) + offsets[0]) % 26;
-        let char0 = rotorI[idx0];
-        let out0 = (alpha.indexOf(char0) - offsets[0] + 26) % 26;
-        
-        // Rotor 1 -> Rotor 2 (Middle) - Let's assume static for now to minimize breakage variables
-        // Actually, let's keep it robust: just 1 Rotor + Reflector is a valid Enigma setup (M1 simplified).
-        // Let's stick to the Single Rotor + Reflector logic above, as it is PROVEN to be reciprocal and less prone to "offset" bugs in a web demo.
-        
-        // Reflector
-        let ref_char = reflB[out0];
-        let ref_idx = alpha.indexOf(ref_char);
-
-        // Reverse Rotor 1
-        let rev_in = (ref_idx + offsets[0]) % 26;
-        let rev_char = alpha[rev_in]; // This is the char entering the rotor wiring from the left
-        let wiring_idx = rotorI.indexOf(rev_char); // Find which pin connects to it
-        let final_idx = (wiring_idx - offsets[0] + 26) % 26;
-
-        return alpha[final_idx];
+    // Helper: Map letter through rotor wiring
+    function forward(char, pos, wiring) {
+        let idx = alphabet.indexOf(char);
+        let contact = (idx + pos) % 26; 
+        let wireOut = wiring[contact];
+        let exitIdx = (alphabet.indexOf(wireOut) - pos + 26) % 26;
+        return alphabet[exitIdx];
     }
+
+    // Helper: Map letter back through rotor wiring
+    function backward(char, pos, wiring) {
+        let idx = alphabet.indexOf(char);
+        let contact = (idx + pos) % 26;
+        let wireIn = alphabet[wiring.indexOf(alphabet[contact])];
+        let exitIdx = (alphabet.indexOf(wireIn) - pos + 26) % 26;
+        return alphabet[exitIdx];
+    }
+
+    init();
 </script>
 </body>
 </html>
