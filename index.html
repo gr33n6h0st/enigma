@@ -2,131 +2,164 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma Engineering Lab</title>
+    <title>Enigma Engineering Lab: Hardware Interface</title>
     <style>
-        body { font-family: 'Courier New', monospace; background: #121212; color: #e0e0e0; text-align: center; padding: 10px; }
-        .case { background: #222; border: 4px solid #444; border-radius: 10px; width: 800px; margin: 0 auto; padding: 20px; box-shadow: 0 0 30px #000; }
-        .rotor-display { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
-        .rotor { background: #eee; color: #111; padding: 15px; border-radius: 4px; width: 40px; font-size: 30px; font-weight: bold; border-bottom: 5px solid #888; }
-        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 20px 0; }
-        .lamp { background: #333; border: 2px solid #444; border-radius: 50%; width: 40px; height: 40px; line-height: 40px; color: #666; font-weight: bold; }
-        .lamp.active { background: #ffcc00; color: #000; box-shadow: 0 0 20px #ffcc00; border: 2px solid #fff; }
-        .plugboard-area { background: #111; padding: 15px; border-radius: 5px; margin-top: 20px; border: 1px dashed #555; }
-        #plugs { width: 90%; background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; font-size: 16px; letter-spacing: 2px; }
-        #trace { background: #000; color: #0f0; text-align: left; padding: 15px; height: 120px; overflow-y: auto; font-size: 12px; margin-top: 15px; border: 1px solid #333; }
-        input[type="text"]#kb { width: 80%; padding: 15px; font-size: 20px; margin: 15px 0; background: #333; color: #fff; border: none; border-radius: 5px; text-transform: uppercase; }
-        button { background: #c0392b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        :root { --panel-bg: #2c3e50; --metal: #7f8c8d; --gold: #f1c40f; --lamp-off: #333; }
+        body { font-family: 'Courier New', monospace; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        /* Machine Case */
+        .enigma-body { background: var(--panel-bg); border: 10px solid #111; border-radius: 10px; padding: 30px; width: 850px; box-shadow: 0 0 50px black; }
+        
+        /* Rotors */
+        .rotor-section { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; background: #222; padding: 20px; border-radius: 5px; }
+        .rotor-unit { text-align: center; }
+        .rotor-val { background: #eee; color: #111; font-size: 32px; font-weight: bold; padding: 10px; border-radius: 5px; width: 50px; cursor: pointer; border-bottom: 4px solid #999; }
+        
+        /* Lampboard */
+        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-bottom: 30px; }
+        .lamp { width: 45px; height: 45px; border-radius: 50%; background: var(--lamp-off); border: 2px solid #111; line-height: 45px; text-align: center; font-weight: bold; color: #555; transition: 0.1s; }
+        .lamp.active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
+
+        /* Visual Plugboard */
+        .plugboard { background: #111; padding: 20px; border-radius: 5px; border: 2px solid #444; }
+        .plug-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 10px; }
+        .plug-socket { width: 35px; height: 35px; border-radius: 50%; background: #000; border: 2px solid var(--metal); cursor: pointer; font-size: 12px; line-height: 35px; text-align: center; }
+        .plug-socket.selected { border-color: var(--gold); background: #332b00; }
+        .plug-socket.wired { border-color: #27ae60; background: #0e2b1a; }
+
+        /* Output Tape */
+        .tape { background: #f9f9f9; color: #222; padding: 15px; width: 90%; margin: 20px auto; min-height: 40px; font-size: 20px; font-weight: bold; letter-spacing: 4px; border-radius: 3px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); overflow-wrap: break-word; text-align: left;}
+        
+        button { background: #c0392b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; margin: 10px; }
+        .info { color: #95a5a6; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h2>ENIGMA SYSTEM SIMULATOR</h2>
-    
-    <div class="case">
-        <div class="rotor-display">
-            <div><div id="r0" class="rotor">A</div><small>L</small></div>
-            <div><div id="r1" class="rotor">A</div><small>M</small></div>
-            <div><div id="r2" class="rotor">A</div><small>R</small></div>
+    <h1>ENIGMA M3: HARDWARE INTERFACE</h1>
+
+    <div class="enigma-body">
+        <div class="rotor-section">
+            <div class="rotor-unit"><div id="rL" class="rotor-val" onclick="stepRotor(0)">A</div><div class="info">LEFT</div></div>
+            <div class="rotor-unit"><div id="rM" class="rotor-val" onclick="stepRotor(1)">A</div><div class="info">MIDDLE</div></div>
+            <div class="rotor-unit"><div id="rR" class="rotor-val" onclick="stepRotor(2)">A</div><div class="info">RIGHT</div></div>
         </div>
 
-        <div class="lampboard" id="lb"></div>
+        <div class="lampboard" id="lboard"></div>
 
-        <input type="text" id="kb" placeholder="TYPE HERE..." autocomplete="off">
+        <div class="info">MESSAGE TAPE:</div>
+        <div id="tape" class="tape"></div>
 
-        <div class="plugboard-area">
-            <label>PLUGBOARD (e.g., AZ BC):</label><br>
-            <input type="text" id="plugs" placeholder="PAIRS TO SWAP" value="">
+        <div class="info">PLUGBOARD (Click two letters to wire them together)</div>
+        <div class="plugboard">
+            <div class="plug-grid" id="pgrid"></div>
         </div>
 
-        <div class="controls" style="margin-top:15px;">
-            <button onclick="resetMachine()">FACTORY RESET (AAA)</button>
+        <div style="margin-top: 20px;">
+            <button onclick="clearTape()">CLEAR TAPE</button>
+            <button onclick="resetMachine()" style="background:#7f8c8d">RESET TO AAA</button>
         </div>
-
-        <div id="trace">System initialized. Awaiting hardware input...</div>
     </div>
+
+    <p>Type on your physical keyboard to encrypt/decrypt.</p>
 
 <script>
     const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const rWiring = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "BDFHJLCPRTXVZNYEIWGAKMUSQO"];
-    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+    const wiring = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "BDFHJLCPRTXVZNYEIWGAKMUSQO"];
+    const reflect = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     let p = [0, 0, 0];
+    let plugMap = {}; // Logic for the wires
+    let selectedSocket = null;
 
-    // Build Lamps
-    const lb = document.getElementById('lb');
+    // Initialize UI
+    const lboard = document.getElementById('lboard');
+    const pgrid = document.getElementById('pgrid');
     alpha.split('').forEach(c => {
-        lb.innerHTML += `<div class="lamp" id="lamp-${c}">${c}</div>`;
+        lboard.innerHTML += `<div class="lamp" id="lamp-${c}">${c}</div>`;
+        pgrid.innerHTML += `<div class="plug-socket" id="plug-${c}" onclick="handlePlugClick('${c}')">${c}</div>`;
     });
 
-    function getPlug(c) {
-        let pairs = document.getElementById('plugs').value.toUpperCase().split(' ');
-        for (let pair of pairs) {
-            if (pair.length === 2) {
-                if (pair[0] === c) return pair[1];
-                if (pair[1] === c) return pair[0];
-            }
+    function handlePlugClick(c) {
+        if (plugMap[c]) { // If already wired, remove it
+            const partner = plugMap[c];
+            delete plugMap[c]; delete plugMap[partner];
+            updatePlugUI();
+            return;
         }
-        return c;
+        if (selectedSocket === null) {
+            selectedSocket = c;
+            document.getElementById(`plug-${c}`).classList.add('selected');
+        } else {
+            if (selectedSocket !== c) {
+                plugMap[selectedSocket] = c;
+                plugMap[c] = selectedSocket;
+            }
+            document.getElementById(`plug-${selectedSocket}`).classList.remove('selected');
+            selectedSocket = null;
+            updatePlugUI();
+        }
     }
 
-    function resetMachine() {
-        p = [0, 0, 0];
-        document.getElementById('kb').value = "";
-        document.getElementById('trace').innerText = "Rotors Reset.";
-        updateUI();
+    function updatePlugUI() {
+        alpha.split('').forEach(c => {
+            const el = document.getElementById(`plug-${c}`);
+            el.classList.remove('wired');
+            if (plugMap[c]) el.classList.add('wired');
+        });
     }
 
-    function run(inputChar) {
-        let log = `In: ${inputChar}`;
-        
-        // 1. Plugboard In (S)
-        let c = getPlug(inputChar);
-        log += ` -> Plug: ${c}`;
+    function stepRotor(idx) {
+        p[idx] = (p[idx] + 1) % 26;
+        updateRotorUI();
+    }
 
-        // 2. Step
+    function updateRotorUI() {
+        document.getElementById('rL').innerText = alpha[p[0]];
+        document.getElementById('rM').innerText = alpha[p[1]];
+        document.getElementById('rR').innerText = alpha[p[2]];
+    }
+
+    function resetMachine() { p = [0,0,0]; updateRotorUI(); }
+    function clearTape() { document.getElementById('tape').innerText = ""; }
+
+    function run(char) {
+        // Plugboard In
+        let c = plugMap[char] || char;
+
+        // Step Right Rotor
         p[2] = (p[2] + 1) % 26;
-        if (p[2] === 17) p[1] = (p[1] + 1) % 26;
-        updateUI();
+        if (p[2] === 17) p[1] = (p[1] + 1) % 26; // Turnover logic
+        updateRotorUI();
 
-        // 3. Rotors Forward
+        // Forward
         let idx = alpha.indexOf(c);
         for (let i = 2; i >= 0; i--) {
             idx = (idx + p[i]) % 26;
-            idx = alpha.indexOf(rWiring[i][idx]);
+            idx = alpha.indexOf(wiring[i][idx]);
             idx = (idx - p[i] + 26) % 26;
         }
-        log += ` -> Rotors: ${alpha[idx]}`;
 
-        // 4. Reflector (R)
-        idx = alpha.indexOf(reflector[idx]);
-        log += ` -> Reflector: ${alpha[idx]}`;
+        // Reflector
+        idx = alpha.indexOf(reflect[idx]);
 
-        // 5. Rotors Back
+        // Backward
         for (let i = 0; i <= 2; i++) {
             idx = (idx + p[i]) % 26;
-            idx = rWiring[i].indexOf(alpha[idx]);
+            idx = wiring[i].indexOf(alpha[idx]);
             idx = (idx - p[i] + 26) % 26;
         }
 
-        // 6. Plugboard Out (S)
-        let out = getPlug(alpha[idx]);
-        log += ` -> Out: ${out}`;
-        
-        document.getElementById('trace').innerText = log + "\n" + document.getElementById('trace').innerText;
-        return out;
+        // Plugboard Out
+        return plugMap[alpha[idx]] || alpha[idx];
     }
 
-    function updateUI() {
-        document.getElementById('r0').innerText = alpha[p[0]];
-        document.getElementById('r1').innerText = alpha[p[1]];
-        document.getElementById('r2').innerText = alpha[p[2]];
-    }
-
-    document.getElementById('kb').addEventListener('keydown', (e) => {
-        let char = e.key.toUpperCase();
+    window.addEventListener('keydown', (e) => {
+        const char = e.key.toUpperCase();
         if (alpha.includes(char) && char.length === 1) {
             document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
-            let result = run(char);
-            document.getElementById('lamp-' + result).classList.add('active');
+            const out = run(char);
+            document.getElementById(`lamp-${out}`).classList.add('active');
+            document.getElementById('tape').innerText += out;
         }
     });
 </script>
