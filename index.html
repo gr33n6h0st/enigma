@@ -2,308 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ENIGMA M3 | WEHRMACHT MODEL</title>
+    <title>Enigma Simulator for Computer Engineering</title>
     <style>
-        :root { --case: #1a1a1a; --key: #000; --lamp: #222; --lit: #ffdb4d; }
-        body { background: #0d0d0d; color: #ccc; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-
-        /* THE MACHINE CHASSIS */
-        .enigma-case {
-            background: #2b2b2b;
-            padding: 30px;
-            border-radius: 4px;
-            border: 4px solid #444;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            width: 700px;
-            position: relative;
-        }
-
-        /* TOP: ROTORS */
-        .rotor-housing {
-            background: #4a4a4a;
-            padding: 15px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #000;
-        }
-        .rotor {
-            width: 60px;
-            height: 80px;
-            background: linear-gradient(to bottom, #222, #000, #222);
-            border: 2px solid #666;
-            border-radius: 4px;
-            color: #ddd;
-            font-size: 2.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            box-shadow: inset 0 0 10px #000;
-        }
-
-        /* MIDDLE: LAMPBOARD */
-        .lampboard {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr); /* QWERT... */
-            gap: 10px;
-            margin-bottom: 25px;
-            padding: 10px;
-            background: #111;
-            border-radius: 4px;
-        }
-        .lamp {
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            background: var(--lamp);
-            border: 2px solid #333;
-            display: flex; justify-content: center; align-items: center;
-            font-weight: bold; color: #555;
-            transition: all 0.05s;
-        }
-        .lamp.active {
-            background: var(--lit);
-            color: #000;
-            box-shadow: 0 0 20px var(--lit);
-            border-color: #fff;
-        }
-
-        /* BOTTOM: KEYBOARD (Visual Only) */
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .key {
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            background: var(--key);
-            border: 4px solid #333;
-            color: #fff;
-            display: flex; justify-content: center; align-items: center;
-            font-weight: bold;
-            box-shadow: 0 4px 0 #111;
-        }
-        .key.pressed { transform: translateY(4px); box-shadow: none; border-color: #666; }
-
-        /* INPUT / OUTPUT AREA */
-        .io-panel {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px solid #444;
-        }
-        .io-box { flex: 1; display: flex; flex-direction: column; }
-        .io-label { color: #888; font-size: 0.8rem; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        
-        textarea {
-            background: #000; color: #0f0;
-            border: 1px solid #333;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            height: 80px;
-            resize: none;
-            font-size: 1rem;
-        }
-        
-        #output-tape { background: #fffbe6; color: #000; font-weight: bold; font-size: 1.2rem; }
-
-        /* CONTROLS */
-        .controls { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
-        
-        button {
-            padding: 12px 24px;
-            font-family: inherit;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            border-radius: 3px;
-        }
-        .btn-run { background: #c00; color: white; box-shadow: 0 4px 0 #700; }
-        .btn-run:active { transform: translateY(4px); box-shadow: none; }
-        .btn-reset { background: #444; color: white; }
-        .btn-copy { background: #d4af37; color: black; }
-
-        .speed-switch { display: flex; align-items: center; gap: 10px; color: #888; font-size: 0.8rem; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #2c3e50; color: white; text-align: center; }
+        .machine-case { background: #34495e; border: 8px solid #222; border-radius: 15px; width: 600px; margin: 40px auto; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .rotor-container { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+        .rotor { background: #ecf0f1; color: #2c3e50; padding: 10px; border-radius: 5px; width: 60px; font-weight: bold; font-size: 24px; border: 3px solid #7f8c8d; }
+        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-top: 20px; }
+        .lamp { background: #444; border: 2px solid #000; border-radius: 50%; width: 40px; height: 40px; line-height: 40px; margin: auto; font-weight: bold; color: #777; transition: 0.1s; }
+        .lamp.active { background: #f1c40f; color: #000; box-shadow: 0 0 20px #f1c40f; }
+        input { margin-top: 30px; padding: 15px; width: 80%; font-size: 18px; text-transform: uppercase; border-radius: 5px; border: none; }
+        .label { font-size: 12px; color: #bdc3c7; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <div class="enigma-case">
-        <div class="rotor-housing">
-            <div class="rotor" id="r2" onclick="setRotor(2)">A</div>
-            <div class="rotor" id="r1" onclick="setRotor(1)">A</div>
-            <div class="rotor" id="r0" onclick="setRotor(0)">A</div>
+    <h1>Mechanical State Machine: Enigma</h1>
+    <p>Type a letter to see the "Circuit" change in real-time.</p>
+
+    <div class="machine-case">
+        <div class="rotor-container">
+            <div><div id="rotor-L" class="rotor">A</div><div class="label">Left (k)</div></div>
+            <div><div id="rotor-M" class="rotor">A</div><div class="label">Middle (j)</div></div>
+            <div><div id="rotor-R" class="rotor">A</div><div class="label">Right (n)</div></div>
         </div>
 
-        <div class="lampboard" id="lamp-grid"></div>
-
-        <div class="keyboard" id="key-grid"></div>
-
-        <div class="io-panel">
-            <div class="io-box">
-                <div class="io-label">Input Text (To Be Typed)</div>
-                <textarea id="input-text" placeholder="PASTE CODE..."></textarea>
-            </div>
-            <div class="io-box">
-                <div class="io-label">Notepad (Result)</div>
-                <textarea id="output-tape" readonly></textarea>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button class="btn-reset" onclick="resetMachine()">RESET ROTORS</button>
-            <button class="btn-run" onclick="startSequence()">TYPE SEQUENCE</button>
-            <button class="btn-copy" onclick="copyResult()">COPY FOR RADIO</button>
-            <div class="speed-switch">
-                <input type="checkbox" id="turbo-mode">
-                <label for="turbo-mode">RAPID ENTRY</label>
-            </div>
-        </div>
+        <div id="lampboard" class="lampboard"></div>
+        
+        <input type="text" id="keyboard" placeholder="CLICK HERE AND TYPE..." maxlength="50" autocomplete="off">
+        <p id="output-text" style="font-family: monospace; letter-spacing: 3px; font-size: 20px; color: #f1c40f;"></p>
     </div>
 
 <script>
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const layout = "QWERTZUIOASDFGHJKPYXCVBNM".split("");
-    
-    // M3 Config
-    const rotors = {
-        I:   "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
-        II:  "AJDKSIRUXBLHWTMCQGZNPYFVOE",
-        III: "BDFHJLCPRTXVZNYEIWGAKMUSQO"
-    };
+    // Real WWII Rotor I, II, III and Reflector B wiring
+    const rotors = [
+        "EKMFLGDQVZNTOWYHXUSPAIBRCJ", // Rotor I
+        "AJDKSIRUXBLHWTMCQGZNPYFVOE", // Rotor II
+        "BDFHJLCPRTXVZNYEIWGAKMUSQO"  // Rotor III
+    ];
     const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+    
+    let pos = [0, 0, 0]; // [Left, Middle, Right]
 
-    let offsets = [0, 0, 0]; // R, M, L
+    // Create Lampboard
+    const lb = document.getElementById('lampboard');
+    alphabet.split('').forEach(char => {
+        const div = document.createElement('div');
+        div.className = 'lamp';
+        div.id = 'lamp-' + char;
+        div.innerText = char;
+        lb.appendChild(div);
+    });
 
-    // --- SETUP UI ---
-    function init() {
-        const lg = document.getElementById('lamp-grid');
-        const kg = document.getElementById('key-grid');
-        layout.forEach(c => {
-            lg.innerHTML += `<div class="lamp" id="L-${c}">${c}</div>`;
-            kg.innerHTML += `<div class="key" id="K-${c}">${c}</div>`;
-        });
-    }
+    function encrypt(char) {
+        let charIdx = alphabet.indexOf(char);
+        if (charIdx === -1) return "";
 
-    // --- LOGIC ---
-    function setRotor(idx) {
-        offsets[idx] = (offsets[idx] + 1) % 26;
-        updateRotorDisplay();
-    }
+        // 1. STEPPING LOGIC (The Odometer)
+        pos[2] = (pos[2] + 1) % 26; // Right rotor always steps
+        if (pos[2] === 17) pos[1] = (pos[1] + 1) % 26; // Simplified turnover
+        if (pos[1] === 5) pos[0] = (pos[0] + 1) % 26;
 
-    function resetMachine() {
-        offsets = [0, 0, 0];
-        updateRotorDisplay();
-        document.getElementById('output-tape').value = "";
-    }
+        updateUI();
 
-    function updateRotorDisplay() {
-        document.getElementById('r0').innerText = alphabet[offsets[0]];
-        document.getElementById('r1').innerText = alphabet[offsets[1]];
-        document.getElementById('r2').innerText = alphabet[offsets[2]];
-    }
-
-    // --- ENIGMA CORE (Stateless Function) ---
-    function processLetter(char, currentPos) {
-        // 1. Step Rotors (Right always steps)
-        let p = [...currentPos];
-        p[0] = (p[0] + 1) % 26;
-        if (p[0] === 0) { // Right notch
-            p[1] = (p[1] + 1) % 26;
-            if (p[1] === 0) { // Mid notch
-                p[2] = (p[2] + 1) % 26;
-            }
+        // 2. SIGNAL FORWARD (Through 3 rotors)
+        for (let i = 2; i >= 0; i--) {
+            charIdx = (charIdx + pos[i]) % 26;
+            charIdx = alphabet.indexOf(rotors[i][charIdx]);
+            charIdx = (charIdx - pos[i] + 26) % 26;
         }
 
-        // 2. Signal Path
-        let c1 = forward(char, p[0], rotors.III);
-        let c2 = forward(c1,   p[1], rotors.II);
-        let c3 = forward(c2,   p[2], rotors.I);
+        // 3. REFLECTOR
+        charIdx = alphabet.indexOf(reflector[charIdx]);
 
-        let ref = reflector[alphabet.indexOf(c3)];
+        // 4. SIGNAL BACKWARD (Back through 3 rotors)
+        for (let i = 0; i <= 2; i++) {
+            charIdx = (charIdx + pos[i]) % 26;
+            let targetChar = alphabet[charIdx];
+            charIdx = rotors[i].indexOf(targetChar);
+            charIdx = (charIdx - pos[i] + 26) % 26;
+        }
 
-        let c4 = backward(ref, p[2], rotors.I);
-        let c5 = backward(c4,  p[1], rotors.II);
-        let c6 = backward(c5,  p[0], rotors.III);
-
-        return { char: c6, newPos: p };
+        return alphabet[charIdx];
     }
 
-    function forward(char, pos, wiring) {
-        let idx = alphabet.indexOf(char);
-        let contact = (idx + pos) % 26;
-        let exit = wiring[contact];
-        return alphabet[(alphabet.indexOf(exit) - pos + 26) % 26];
+    function updateUI() {
+        document.getElementById('rotor-L').innerText = alphabet[pos[0]];
+        document.getElementById('rotor-M').innerText = alphabet[pos[1]];
+        document.getElementById('rotor-R').innerText = alphabet[pos[2]];
     }
 
-    function backward(char, pos, wiring) {
-        let idx = alphabet.indexOf(char);
-        let contact = (idx + pos) % 26;
-        let wireIn = alphabet[wiring.indexOf(alphabet[contact])];
-        return alphabet[(alphabet.indexOf(wireIn) - pos + 26) % 26];
-    }
-
-    // --- ANIMATION SEQUENCE ---
-    async function startSequence() {
-        const input = document.getElementById('input-text').value.toUpperCase();
-        const outputField = document.getElementById('output-tape');
-        const turbo = document.getElementById('turbo-mode').checked;
-        
-        outputField.value = ""; // Clear output
-        
-        for (let i = 0; i < input.length; i++) {
-            let char = input[i];
+    document.getElementById('keyboard').addEventListener('keydown', (e) => {
+        const key = e.key.toUpperCase();
+        if (alphabet.includes(key)) {
+            // Reset lamps
+            document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
             
-            if (alphabet.includes(char)) {
-                // Run Logic
-                let result = processLetter(char, offsets);
-                offsets = result.newPos; // Update internal state
-                
-                // Update UI
-                updateRotorDisplay();
-                outputField.value += result.char;
-
-                if (!turbo) {
-                    // Animate Lamp
-                    lightLamp(result.char);
-                    animateKey(char);
-                    await new Promise(r => setTimeout(r, 150)); // Speed of typing
-                }
-            } else {
-                outputField.value += char; // Pass spaces/punctuation
-            }
+            const result = encrypt(key);
+            document.getElementById('lamp-' + result).classList.add('active');
+            document.getElementById('output-text').innerText += result;
         }
-    }
-
-    function lightLamp(char) {
-        const l = document.getElementById(`L-${char}`);
-        if(l) {
-            l.classList.add('active');
-            setTimeout(() => l.classList.remove('active'), 100);
-        }
-    }
-
-    function animateKey(char) {
-        const k = document.getElementById(`K-${char}`);
-        if(k) {
-            k.classList.add('pressed');
-            setTimeout(() => k.classList.remove('pressed'), 100);
-        }
-    }
-
-    function copyResult() {
-        const copyText = document.getElementById("output-tape");
-        copyText.select();
-        document.execCommand("copy");
-    }
-
-    init();
+    });
 </script>
 </body>
 </html>
