@@ -4,89 +4,103 @@
     <meta charset="UTF-8">
     <title>Enigma Engineering Lab: Hardware Interface</title>
     <style>
-        :root { --panel-bg: #2c3e50; --metal: #7f8c8d; --gold: #f1c40f; --lamp-off: #333; }
-        body { font-family: 'Courier New', monospace; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        :root { --panel-bg: #2c3e50; --gold: #f1c40f; --lamp-off: #333; --cable: #e74c3c; }
+        body { font-family: 'Courier New', monospace; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-x: hidden; }
         
-        /* Machine Case */
-        .enigma-body { background: var(--panel-bg); border: 10px solid #111; border-radius: 10px; padding: 30px; width: 850px; box-shadow: 0 0 50px black; }
+        .enigma-body { background: var(--panel-bg); border: 10px solid #111; border-radius: 10px; padding: 25px; width: 850px; box-shadow: 0 0 50px black; position: relative; }
         
         /* Rotors */
-        .rotor-section { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; background: #222; padding: 20px; border-radius: 5px; }
+        .rotor-section { display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; background: #222; padding: 15px; border-radius: 5px; border: 2px solid #444; }
         .rotor-unit { text-align: center; }
-        .rotor-val { background: #eee; color: #111; font-size: 32px; font-weight: bold; padding: 10px; border-radius: 5px; width: 50px; cursor: pointer; border-bottom: 4px solid #999; }
+        .rotor-val { background: #fff; color: #000; font-size: 32px; font-weight: bold; padding: 10px; border-radius: 5px; width: 50px; cursor: pointer; border-bottom: 5px solid #888; user-select: none; }
         
+        /* Tapes */
+        .tape-label { font-size: 12px; color: #bdc3c7; margin-top: 10px; text-align: left; width: 90%; }
+        .tape { background: #f9f9f9; color: #222; padding: 10px; width: 90%; min-height: 30px; font-size: 18px; font-weight: bold; letter-spacing: 2px; border-radius: 3px; margin: 5px auto; text-align: left; overflow-x: auto; white-space: nowrap; }
+        #input-tape { background: #e8e8e8; border-left: 5px solid #3498db; }
+        #output-tape { background: #fff; border-left: 5px solid var(--gold); }
+
         /* Lampboard */
-        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-bottom: 30px; }
-        .lamp { width: 45px; height: 45px; border-radius: 50%; background: var(--lamp-off); border: 2px solid #111; line-height: 45px; text-align: center; font-weight: bold; color: #555; transition: 0.1s; }
-        .lamp.active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
+        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 20px 0; }
+        .lamp { width: 45px; height: 45px; border-radius: 50%; background: var(--lamp-off); border: 2px solid #111; line-height: 45px; text-align: center; font-weight: bold; color: #555; }
+        .lamp.active { background: var(--gold); color: black; box-shadow: 0 0 20px var(--gold); }
 
-        /* Visual Plugboard */
-        .plugboard { background: #111; padding: 20px; border-radius: 5px; border: 2px solid #444; }
-        .plug-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 10px; }
-        .plug-socket { width: 35px; height: 35px; border-radius: 50%; background: #000; border: 2px solid var(--metal); cursor: pointer; font-size: 12px; line-height: 35px; text-align: center; }
-        .plug-socket.selected { border-color: var(--gold); background: #332b00; }
-        .plug-socket.wired { border-color: #27ae60; background: #0e2b1a; }
-
-        /* Output Tape */
-        .tape { background: #f9f9f9; color: #222; padding: 15px; width: 90%; margin: 20px auto; min-height: 40px; font-size: 20px; font-weight: bold; letter-spacing: 4px; border-radius: 3px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); overflow-wrap: break-word; text-align: left;}
+        /* Plugboard */
+        .plugboard-container { position: relative; background: #111; padding: 20px; border-radius: 5px; border: 2px solid #444; margin-top: 10px; }
+        .plug-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 15px; position: relative; z-index: 2; }
+        .socket { width: 30px; height: 30px; border-radius: 50%; background: #000; border: 2px solid #7f8c8d; cursor: pointer; font-size: 10px; line-height: 30px; text-align: center; user-select: none; }
+        .socket.selected { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
         
-        button { background: #c0392b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; margin: 10px; }
-        .info { color: #95a5a6; font-size: 12px; margin-top: 10px; }
+        button { background: #c0392b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; margin: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>ENIGMA M3: HARDWARE INTERFACE</h1>
+    <h1>ENIGMA M3: ENGINEERING LAB</h1>
 
     <div class="enigma-body">
         <div class="rotor-section">
-            <div class="rotor-unit"><div id="rL" class="rotor-val" onclick="stepRotor(0)">A</div><div class="info">LEFT</div></div>
-            <div class="rotor-unit"><div id="rM" class="rotor-val" onclick="stepRotor(1)">A</div><div class="info">MIDDLE</div></div>
-            <div class="rotor-unit"><div id="rR" class="rotor-val" onclick="stepRotor(2)">A</div><div class="info">RIGHT</div></div>
+            <div class="rotor-unit"><div id="rL" class="rotor-val" onclick="manualStep(0)">A</div><small>L</small></div>
+            <div class="rotor-unit"><div id="rM" class="rotor-val" onclick="manualStep(1)">A</div><small>M</small></div>
+            <div class="rotor-unit"><div id="rR" class="rotor-val" onclick="manualStep(2)">A</div><small>R</small></div>
         </div>
 
         <div class="lampboard" id="lboard"></div>
 
-        <div class="info">MESSAGE TAPE:</div>
-        <div id="tape" class="tape"></div>
+        <div class="tape-label">KEYBOARD INPUT (WHAT YOU TYPE):</div>
+        <div id="input-tape" class="tape"></div>
+        
+        <div class="tape-label">ENCRYPTED OUTPUT (LAMPBOARD RESULT):</div>
+        <div id="output-tape" class="tape"></div>
 
-        <div class="info">PLUGBOARD (Click two letters to wire them together)</div>
-        <div class="plugboard">
+        <div class="plugboard-container" id="p-container">
+            <canvas id="cable-canvas"></canvas>
             <div class="plug-grid" id="pgrid"></div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <button onclick="clearTape()">CLEAR TAPE</button>
-            <button onclick="resetMachine()" style="background:#7f8c8d">RESET TO AAA</button>
+        <div style="margin-top: 15px;">
+            <button onclick="resetMachine()">RESET ROTORS</button>
+            <button onclick="clearTapes()" style="background:#7f8c8d">CLEAR TAPES</button>
+            <button onclick="clearPlugs()" style="background:#34495e">REMOVE ALL CABLES</button>
         </div>
     </div>
-
-    <p>Type on your physical keyboard to encrypt/decrypt.</p>
 
 <script>
     const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const wiring = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "BDFHJLCPRTXVZNYEIWGAKMUSQO"];
     const reflect = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     let p = [0, 0, 0];
-    let plugMap = {}; // Logic for the wires
+    let plugMap = {};
     let selectedSocket = null;
+    const colors = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#1abc9c"];
 
-    // Initialize UI
+    // Setup
     const lboard = document.getElementById('lboard');
     const pgrid = document.getElementById('pgrid');
-    alpha.split('').forEach(c => {
-        lboard.innerHTML += `<div class="lamp" id="lamp-${c}">${c}</div>`;
-        pgrid.innerHTML += `<div class="plug-socket" id="plug-${c}" onclick="handlePlugClick('${c}')">${c}</div>`;
-    });
+    const canvas = document.getElementById('cable-canvas');
+    const ctx = canvas.getContext('2d');
 
-    function handlePlugClick(c) {
-        if (plugMap[c]) { // If already wired, remove it
+    function init() {
+        alpha.split('').forEach(c => {
+            lboard.innerHTML += `<div class="lamp" id="lamp-${c}">${c}</div>`;
+            pgrid.innerHTML += `<div class="socket" id="plug-${c}" onclick="handlePlug('${c}')">${c}</div>`;
+        });
+        resizeCanvas();
+    }
+
+    function resizeCanvas() {
+        const container = document.getElementById('p-container');
+        canvas.width = container.offsetWidth;
+        canvas.height = container.offsetHeight;
+        drawCables();
+    }
+
+    function handlePlug(c) {
+        if (plugMap[c]) {
             const partner = plugMap[c];
             delete plugMap[c]; delete plugMap[partner];
-            updatePlugUI();
-            return;
-        }
-        if (selectedSocket === null) {
+        } else if (selectedSocket === null) {
             selectedSocket = c;
             document.getElementById(`plug-${c}`).classList.add('selected');
         } else {
@@ -96,62 +110,76 @@
             }
             document.getElementById(`plug-${selectedSocket}`).classList.remove('selected');
             selectedSocket = null;
-            updatePlugUI();
+        }
+        drawCables();
+    }
+
+    function drawCables() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let colorIdx = 0;
+        const drawn = new Set();
+
+        for (let s in plugMap) {
+            if (drawn.has(s)) continue;
+            const s1 = document.getElementById(`plug-${s}`);
+            const s2 = document.getElementById(`plug-${plugMap[s]}`);
+            
+            const r1 = s1.getBoundingClientRect();
+            const r2 = s2.getBoundingClientRect();
+            const cRect = canvas.getBoundingClientRect();
+
+            ctx.beginPath();
+            ctx.strokeStyle = colors[colorIdx % colors.length];
+            ctx.lineWidth = 4;
+            ctx.lineCap = "round";
+            
+            const x1 = r1.left - cRect.left + 15;
+            const y1 = r1.top - cRect.top + 15;
+            const x2 = r2.left - cRect.left + 15;
+            const y2 = r2.top - cRect.top + 15;
+
+            ctx.moveTo(x1, y1);
+            // Draw a slight curve for the cable
+            ctx.bezierCurveTo(x1, y1 + 40, x2, y2 + 40, x2, y2);
+            ctx.stroke();
+
+            drawn.add(s);
+            drawn.add(plugMap[s]);
+            colorIdx++;
         }
     }
 
-    function updatePlugUI() {
-        alpha.split('').forEach(c => {
-            const el = document.getElementById(`plug-${c}`);
-            el.classList.remove('wired');
-            if (plugMap[c]) el.classList.add('wired');
-        });
-    }
-
-    function stepRotor(idx) {
-        p[idx] = (p[idx] + 1) % 26;
-        updateRotorUI();
-    }
-
-    function updateRotorUI() {
-        document.getElementById('rL').innerText = alpha[p[0]];
-        document.getElementById('rM').innerText = alpha[p[1]];
-        document.getElementById('rR').innerText = alpha[p[2]];
-    }
-
-    function resetMachine() { p = [0,0,0]; updateRotorUI(); }
-    function clearTape() { document.getElementById('tape').innerText = ""; }
-
     function run(char) {
-        // Plugboard In
         let c = plugMap[char] || char;
-
-        // Step Right Rotor
         p[2] = (p[2] + 1) % 26;
-        if (p[2] === 17) p[1] = (p[1] + 1) % 26; // Turnover logic
-        updateRotorUI();
+        if (p[2] === 17) p[1] = (p[1] + 1) % 26;
+        updateUI();
 
-        // Forward
         let idx = alpha.indexOf(c);
         for (let i = 2; i >= 0; i--) {
             idx = (idx + p[i]) % 26;
             idx = alpha.indexOf(wiring[i][idx]);
             idx = (idx - p[i] + 26) % 26;
         }
-
-        // Reflector
         idx = alpha.indexOf(reflect[idx]);
-
-        // Backward
         for (let i = 0; i <= 2; i++) {
             idx = (idx + p[i]) % 26;
             idx = wiring[i].indexOf(alpha[idx]);
             idx = (idx - p[i] + 26) % 26;
         }
-
-        // Plugboard Out
         return plugMap[alpha[idx]] || alpha[idx];
     }
+
+    function updateUI() {
+        document.getElementById('rL').innerText = alpha[p[0]];
+        document.getElementById('rM').innerText = alpha[p[1]];
+        document.getElementById('rR').innerText = alpha[p[2]];
+    }
+
+    function manualStep(i) { p[i] = (p[i] + 1) % 26; updateUI(); }
+    function resetMachine() { p = [0,0,0]; updateUI(); }
+    function clearTapes() { document.getElementById('input-tape').innerText = ""; document.getElementById('output-tape').innerText = ""; }
+    function clearPlugs() { plugMap = {}; drawCables(); }
 
     window.addEventListener('keydown', (e) => {
         const char = e.key.toUpperCase();
@@ -159,9 +187,13 @@
             document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
             const out = run(char);
             document.getElementById(`lamp-${out}`).classList.add('active');
-            document.getElementById('tape').innerText += out;
+            document.getElementById('input-tape').innerText += char;
+            document.getElementById('output-tape').innerText += out;
         }
     });
+
+    window.addEventListener('resize', resizeCanvas);
+    init();
 </script>
 </body>
 </html>
