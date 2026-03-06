@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma M3: Engineering Lab</title>
+    <title>Enigma M3: Mechanical Engineering Lab</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Fira+Code:wght@400;700&display=swap');
 
         :root {
             --wood-frame: #2d1b0d;
-            --faceplate: #1c1c1c;
             --gold-leaf: #d4af37;
             --tape-paper: #fdfae6;
             --logic-green: #00ff41;
@@ -41,64 +40,68 @@
             box-shadow: inset 0 0 40px rgba(0,0,0,1);
         }
 
-        /* Logic Monitor Styling */
-        .logic-monitor {
-            background: #000;
-            border: 2px solid #444;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-family: 'Fira Code', monospace;
-            font-size: 11px;
-            color: var(--logic-green);
-            display: none; /* Controlled by toggle */
-            border-left: 5px solid var(--logic-green);
-        }
-
+        /* --- ROTOR ANIMATION LOGIC --- */
         .rotor-section { display: flex; justify-content: center; gap: 25px; margin-bottom: 20px; }
-        .rotor-slot { background: #000; padding: 8px; border: 2px solid #444; border-radius: 4px; box-shadow: inset 0 8px 12px #000; }
+        
+        .rotor-slot { 
+            background: #000; 
+            padding: 5px; 
+            border: 3px solid #333; 
+            border-radius: 4px; 
+            overflow: hidden; /* Clips the spinning wheel */
+            height: 80px;
+            width: 60px;
+            position: relative;
+            box-shadow: inset 0 10px 10px #000;
+        }
+
         .rotor-wheel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(to bottom, #333 0%, #eee 45%, #eee 55%, #333 100%);
-            color: #000; font-size: 32px; font-weight: bold; width: 50px; height: 70px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none;
+            color: #000;
+            font-size: 40px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: transform 0.15s cubic-bezier(0.45, 0.05, 0.55, 0.95);
         }
 
+        /* The "Spin" Animation Class */
+        .spin-down {
+            animation: clickDown 0.15s;
+        }
+
+        @keyframes clickDown {
+            0% { transform: translateY(-100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Rest of the aesthetic styles */
+        .logic-monitor { background: #000; border: 2px solid #444; padding: 10px; margin-bottom: 20px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--logic-green); display: none; border-left: 5px solid var(--logic-green); }
         .lamp-bay { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-bottom: 25px; }
-        .lamp-hole {
-            width: 45px; height: 45px; border-radius: 50%; background: #111; border: 2px solid #222;
-            line-height: 45px; text-align: center; font-size: 18px; color: #444; box-shadow: inset 0 4px 8px #000;
-        }
+        .lamp-hole { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 2px solid #222; line-height: 45px; text-align: center; font-size: 18px; color: #444; box-shadow: inset 0 4px 8px #000; }
         .lamp-hole.lit { background: radial-gradient(circle at 30% 30%, #fff, #ffcc00); color: #000; box-shadow: 0 0 30px #ffcc00; }
-
-        .tape-readout {
-            background: var(--tape-paper); color: #222; padding: 10px; font-size: 18px; letter-spacing: 4px;
-            border-radius: 2px; min-height: 20px; text-align: left; margin-bottom: 8px; border-left: 8px solid #34495e;
-        }
+        .tape-readout { background: var(--tape-paper); color: #222; padding: 10px; font-size: 18px; letter-spacing: 4px; border-radius: 2px; min-height: 20px; text-align: left; margin-bottom: 8px; border-left: 8px solid #34495e; text-transform: uppercase; }
         #output-tape { border-left: 8px solid var(--gold-leaf); }
-
         .plugboard { background: #050505; padding: 15px; border-radius: 4px; position: relative; }
         .socket-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 10px; z-index: 2; position: relative; }
         .socket { width: 25px; height: 25px; background: #000; border: 3px solid #444; border-radius: 50%; cursor: pointer; }
         .socket.active { border-color: #fff; box-shadow: 0 0 10px #fff; }
         #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
-
-        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        button {
-            background: #3e2723; color: #d7ccc8; border: 2px solid #1b110b; padding: 8px 15px;
-            border-radius: 3px; cursor: pointer; font-weight: bold; font-family: 'Special Elite', serif;
-            font-size: 11px; box-shadow: 0 3px 0 #000;
-        }
+        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+        button { background: #3e2723; color: #d7ccc8; border: 2px solid #1b110b; padding: 8px 15px; border-radius: 3px; cursor: pointer; font-weight: bold; font-family: 'Special Elite', serif; font-size: 11px; box-shadow: 0 3px 0 #000; }
         button:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
-        .toggle-btn { background: #1b5e20; }
     </style>
 </head>
 <body onload="init()">
 
     <div class="enigma-chassis">
         <div class="faceplate">
-            <div id="logic-box" class="logic-monitor">
-                > WAITING FOR HARDWARE INPUT...
-            </div>
+            <div id="logic-box" class="logic-monitor">> WAITING FOR HARDWARE INPUT...</div>
 
             <div class="rotor-section">
                 <div class="rotor-slot"><div id="rL" class="rotor-wheel" onclick="manualStep(0)">A</div></div>
@@ -117,7 +120,7 @@
             </div>
 
             <div class="controls">
-                <button class="toggle-btn" onclick="toggleLogic()">TOGGLE LOGIC MONITOR</button>
+                <button onclick="toggleLogic()">TOGGLE LOGIC MONITOR</button>
                 <button onclick="fullReset()">RESET ROTORS</button>
                 <button onclick="clearTapes()" style="background:#546e7a">CLEAR TAPES</button>
                 <button onclick="clearPlugs()" style="background:#263238">PULL CABLES</button>
@@ -195,47 +198,47 @@
 
     function run(char) {
         history.push([...p]);
+        let oldP = [...p];
         let steps = [];
         
-        // Input & Plugboard
         let current = plugMap[char] || char;
         steps.push(`INPUT: ${char} -> PLUGBOARD: ${current}`);
         
-        // Stepping
+        // Logical Stepping
         p[2] = (p[2] + 1) % 26;
-        if (p[2] === 17) p[1] = (p[1] + 1) % 26;
+        let middleStepped = false;
+        if (p[2] === 17) { p[1] = (p[1] + 1) % 26; middleStepped = true; }
+        
+        // Trigger Animations for changed rotors
+        triggerSpin('rR');
+        if (middleStepped) triggerSpin('rM');
+        if (p[1] === 17 && middleStepped) { p[0] = (p[0] + 1) % 26; triggerSpin('rL'); }
+
         updateUI();
 
         let idx = alpha.indexOf(current);
-        
-        // Forward Rotors
         for (let i = 2; i >= 0; i--) {
             idx = (idx + p[i]) % 26;
-            let letterIn = alpha[idx];
             idx = alpha.indexOf(rotors[i][idx]);
             idx = (idx - p[i] + 26) % 26;
-            steps.push(`ROTOR ${['L','M','R'][i]} FORWARD: ${letterIn} -> ${alpha[idx]}`);
         }
-
-        // Reflector
-        let refIn = alpha[idx];
         idx = alpha.indexOf(reflector[idx]);
-        steps.push(`REFLECTOR: ${refIn} -> ${alpha[idx]}`);
-
-        // Backward Rotors
         for (let i = 0; i <= 2; i++) {
             idx = (idx + p[i]) % 26;
-            let letterIn = alpha[idx];
             idx = rotors[i].indexOf(alpha[idx]);
             idx = (idx - p[i] + 26) % 26;
-            steps.push(`ROTOR ${['L','M','R'][i]} RETURN: ${letterIn} -> ${alpha[idx]}`);
         }
 
         let result = plugMap[alpha[idx]] || alpha[idx];
-        steps.push(`PLUGBOARD: ${alpha[idx]} -> LAMP: ${result}`);
-        
-        document.getElementById('logic-box').innerHTML = "> LOGIC PATH:<br>" + steps.join("<br>");
+        document.getElementById('logic-box').innerHTML = "> ROTOR STEPPED. PATH UPDATED.<br>> RESULT: " + result;
         return result;
+    }
+
+    function triggerSpin(id) {
+        const el = document.getElementById(id);
+        el.classList.remove('spin-down');
+        void el.offsetWidth; // Force reflow to restart animation
+        el.classList.add('spin-down');
     }
 
     function updateUI() {
@@ -247,7 +250,12 @@
     function fullReset() { p = [0,0,0]; history = []; updateUI(); }
     function clearTapes() { document.getElementById('input-tape').innerText = ""; document.getElementById('output-tape').innerText = ""; history = []; }
     function clearPlugs() { plugMap = {}; drawCables(); }
-    function manualStep(i) { p[i] = (p[i] + 1) % 26; history = []; updateUI(); }
+    function manualStep(i) { 
+        p[i] = (p[i] + 1) % 26; 
+        triggerSpin(['rL','rM','rR'][i]);
+        history = []; 
+        updateUI(); 
+    }
     function resizeCanvas() { 
         const c = document.getElementById('cable-canvas');
         const container = document.getElementById('p-container');
@@ -263,7 +271,6 @@
                 document.getElementById('output-tape').innerText = document.getElementById('output-tape').innerText.slice(0,-1);
                 updateUI();
                 document.querySelectorAll('.lamp-hole').forEach(l => l.classList.remove('lit'));
-                document.getElementById('logic-box').innerHTML = "> BACKSPACE DETECTED: SYSTEM REVERTED";
             }
             e.preventDefault(); return;
         }
