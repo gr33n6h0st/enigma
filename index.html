@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma M3: Vertical Engineering Lab</title>
+    <title>Enigma M3: Engineering Lab</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Fira+Code:wght@400;700&display=swap');
 
@@ -33,21 +33,10 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
 
-        /* Logic Monitor - Restored to Vertical List */
         .logic-monitor { 
-            background: #000; 
-            border: 1px solid #333; 
-            border-radius: 3px; 
-            padding: 12px; 
-            margin-bottom: 20px; 
-            font-family: 'Fira Code', monospace; 
-            font-size: 11px; 
-            color: var(--logic-green); 
-            display: none; 
-            border-left: 4px solid var(--logic-green); 
-            line-height: 1.5; 
-            max-height: 250px; 
-            overflow-y: auto;
+            background: #000; border: 1px solid #333; border-radius: 3px; padding: 12px; margin-bottom: 20px; 
+            font-family: 'Fira Code', monospace; font-size: 11px; color: var(--logic-green); display: none; 
+            border-left: 4px solid var(--logic-green); line-height: 1.5; max-height: 250px; overflow-y: auto;
         }
 
         .rotor-section { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
@@ -66,10 +55,7 @@
         }
 
         .spin-down { animation: clickMove 0.12s ease-out; }
-        @keyframes clickMove {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(0); }
-        }
+        @keyframes clickMove { 0% { transform: translateY(-100%); } 100% { transform: translateY(0); } }
 
         .lamp-bay { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; margin-bottom: 20px; }
         .lamp-hole { 
@@ -96,7 +82,7 @@
         .socket.active { border-color: #fff; box-shadow: 0 0 10px #fff; }
         #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
 
-        .controls { margin-top: 15px; display: flex; justify-content: center; gap: 8px; }
+        .controls { margin-top: 15px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
         button { 
             background: #2a2a2a; color: #ccc; border: 1px solid #444; padding: 8px 15px; 
             border-radius: 2px; cursor: pointer; font-family: 'Special Elite', serif; font-size: 11px;
@@ -130,6 +116,7 @@
             <button onclick="fullReset()">RESET (AAA)</button>
             <button onclick="clearTapes()" style="background:#455a64">CLEAR TAPES</button>
             <button onclick="clearPlugs()" style="background:#263238">PULL CABLES</button>
+            <button onclick="saveTape()" style="background:#827717; color: white; font-weight: bold;">SAVE TO FILE</button>
         </div>
     </div>
 
@@ -138,6 +125,7 @@
     const rotors = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "BDFHJLCPRTXVZNYEIWGAKMUSQO"];
     const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     let p = [0, 0, 0];
+    let startPos = "AAA";
     let history = [];
     let plugMap = {};
     let selected = null;
@@ -195,6 +183,7 @@
     }
 
     function run(char) {
+        if (history.length === 0) startPos = alpha[p[0]] + alpha[p[1]] + alpha[p[2]];
         history.push([...p]);
         let trace = [];
         let current = plugMap[char] || char;
@@ -209,7 +198,6 @@
         updateUI();
 
         let idx = alpha.indexOf(current);
-        // Forward
         for (let i = 2; i >= 0; i--) {
             idx = (idx + p[i]) % 26;
             let letterIn = alpha[idx];
@@ -217,11 +205,8 @@
             idx = (idx - p[i] + 26) % 26;
             trace.push(`[ROTOR ${['I','II','III'][i]}] FORWARD: ${letterIn} -> OUT: ${alpha[idx]}`);
         }
-        // Reflector
-        let refIn = alpha[idx];
         idx = alpha.indexOf(reflector[idx]);
-        trace.push(`[REFLECTOR] IN: ${refIn} -> OUT: ${alpha[idx]}`);
-        // Return
+        trace.push(`[REFLECTOR] -> ${alpha[idx]}`);
         for (let i = 0; i <= 2; i++) {
             idx = (idx + p[i]) % 26;
             let letterIn = alpha[idx];
@@ -229,10 +214,8 @@
             idx = (idx - p[i] + 26) % 26;
             trace.push(`[ROTOR ${['I','II','III'][i]}] RETURN: ${letterIn} -> OUT: ${alpha[idx]}`);
         }
-
         let res = plugMap[alpha[idx]] || alpha[idx];
         trace.push(`[PLUGBOARD] RETURN: ${alpha[idx]} -> LAMP: ${res}`);
-        
         document.getElementById('logic-box').innerHTML = "> SIGNAL PATH:<br>" + trace.join("<br>");
         return res;
     }
@@ -250,10 +233,25 @@
         document.getElementById('rR').innerText = alpha[p[2]];
     }
 
-    function fullReset() { p = [0,0,0]; updateUI(); document.getElementById('logic-box').innerHTML = "> RESET TO AAA"; }
-    function clearTapes() { document.getElementById('input-tape').innerText = ""; document.getElementById('output-tape').innerText = ""; }
+    function fullReset() { p = [0,0,0]; history = []; updateUI(); document.getElementById('logic-box').innerHTML = "> RESET TO AAA"; }
+    function clearTapes() { document.getElementById('input-tape').innerText = ""; document.getElementById('output-tape').innerText = ""; history = []; }
     function clearPlugs() { plugMap = {}; drawCables(); }
     function resizeCanvas() { drawCables(); }
+
+    function saveTape() {
+        const input = document.getElementById('input-tape').innerText;
+        const output = document.getElementById('output-tape').innerText;
+        if (!input) return alert("Tape is empty!");
+        
+        const plugs = Object.entries(plugMap).filter((v, i, a) => a.findIndex(t => t[0] === v[1]) > i).map(pair => pair.join("-")).join(", ") || "None";
+        
+        const content = `ENIGMA M3 LAB REPORT\n====================\nSTART ROTORS: ${startPos}\nPLUGBOARD: ${plugs}\n\nINPUT:  ${input}\nOUTPUT: ${output}`;
+        const blob = new Blob([content], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "enigma_tape.txt";
+        link.click();
+    }
 
     window.addEventListener('keydown', (e) => {
         if (e.key === "Backspace") {
@@ -262,7 +260,6 @@
                 document.getElementById('input-tape').innerText = document.getElementById('input-tape').innerText.slice(0,-1);
                 document.getElementById('output-tape').innerText = document.getElementById('output-tape').innerText.slice(0,-1);
                 updateUI(); document.querySelectorAll('.lamp-hole').forEach(l => l.classList.remove('lit'));
-                document.getElementById('logic-box').innerHTML = "> BACKSPACE: REVERTING LOGIC";
             }
             e.preventDefault(); return;
         }
