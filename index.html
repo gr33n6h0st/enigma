@@ -2,76 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma M3: Final Engineering Lab</title>
+    <title>Enigma M3: Engineering Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Fira+Code:wght@400;700&display=swap');
 
         :root {
-            --wood-frame: #2d1b0d;
-            --gold-leaf: #d4af37;
-            --tape-paper: #fdfae6;
+            /* The New Industrial Palette */
+            --steel-dark: #1f1f1f;
+            --steel-medium: #3c3c3c;
+            --steel-light: #5d5d5d;
+            
+            --key-top: #151515;
+            --key-side: #050505;
+            --lamp-glass: #222;
+            --bulb-glow: #ffae00; /* Warm tungsten glow */
+            
+            --tape-paper: #fffef0; /* Parchment/Paper Tape */
+            --tape-input: #d1e1f0; /* Faint blueprint blue */
+            --gold-leaf: #b08d57; /* Aged brass/gold */
             --logic-green: #00ff41;
         }
 
         body {
-            background: #0a0a0a;
+            /* Ambient background */
+            background-color: #050505;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 50%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H2V1z' fill='%23222' fill-opacity='0.4'/%3E%3C/svg%3E");
+            color: #ccc;
+            font-family: 'Special Elite', serif; /* Odometer/Typewriter font */
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            font-family: 'Special Elite', serif;
-            color: #ddd;
+            margin: 0;
         }
 
+        /* The Main Industrial Chassis */
         .enigma-chassis {
-            background: linear-gradient(145deg, #4e342e, #261a13);
-            border: 12px solid #1a0f08;
+            background-color: var(--steel-medium);
+            background-image: linear-gradient(135deg, var(--steel-dark) 0%, var(--steel-medium) 50%, var(--steel-dark) 100%);
+            border: 10px solid #111;
             border-radius: 4px;
-            padding: 30px;
-            width: 850px;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            padding: 40px;
+            width: 880px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9), inset 0 0 15px rgba(255,255,255,0.05);
+            position: relative;
         }
 
-        .faceplate {
-            background: radial-gradient(circle, #333 0%, #111 100%);
-            border: 4px solid #000;
-            padding: 20px;
-            border-radius: 2px;
-            box-shadow: inset 0 0 40px rgba(0,0,0,1);
-        }
-
+        /* Logic Monitor (Green Screen) */
         .logic-monitor { 
-            background: #000; border: 2px solid #444; border-radius: 4px; padding: 12px; margin-bottom: 20px; 
+            background: #000; border: 2px solid #222; border-radius: 4px; padding: 12px; margin-bottom: 25px; 
             font-family: 'Fira Code', monospace; font-size: 11px; color: var(--logic-green); display: none; 
             border-left: 5px solid var(--logic-green); line-height: 1.4; max-height: 250px; overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0,255,65,0.2);
         }
 
-        /* ROTOR SECTION */
-        .rotor-section { display: flex; justify-content: center; gap: 25px; margin-bottom: 20px; }
+        /* ROTOR SECTION (The Odometer Look) */
+        .rotor-section { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; }
         .rotor-container { text-align: center; }
-        .rotor-name { font-size: 14px; color: var(--gold-leaf); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; }
-        .rotor-slot { background: #000; padding: 5px; border: 3px solid #333; border-radius: 4px; overflow: hidden; height: 80px; width: 60px; position: relative; box-shadow: inset 0 10px 10px #000; }
-        .rotor-wheel { position: absolute; width: 100%; height: 100%; background: linear-gradient(to bottom, #333 0%, #eee 45%, #eee 55%, #333 100%); color: #000; font-size: 40px; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .rotor-name { font-size: 14px; color: #888; margin-bottom: 8px; font-weight: bold; letter-spacing: 3px; }
         
-        .spin-down { animation: clickDown 0.15s; }
+        .rotor-slot { 
+            background: #000; 
+            padding: 8px; 
+            border: 3px solid var(--steel-dark); 
+            border-radius: 4px; 
+            overflow: hidden; 
+            height: 80px; 
+            width: 65px; 
+            position: relative; 
+            box-shadow: inset 0 10px 20px #000, 0 1px 2px rgba(255,255,255,0.1);
+        }
+        
+        /* The Mechanical Rotor Wheel */
+        .rotor-wheel { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            /* The "curved metal" gradient */
+            background: linear-gradient(to bottom, #333 0%, #eee 40%, #eee 60%, #333 100%); 
+            color: #000; 
+            font-size: 44px; 
+            font-weight: bold; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            user-select: none; 
+            cursor: ns-resize; /* Cursor shows scroll possibility */
+            border-left: 3px solid var(--steel-dark); 
+            border-right: 3px solid var(--steel-dark); 
+        }
+        
+        /* Odometer Animation */
+        .spin-down { animation: clickDown 0.15scubic-bezier(0.45, 0.05, 0.55, 0.95); }
         @keyframes clickDown { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
-        .lamp-bay { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-bottom: 25px; }
-        .lamp-hole { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 2px solid #222; line-height: 45px; text-align: center; font-size: 18px; color: #444; box-shadow: inset 0 4px 8px #000; }
-        .lamp-hole.lit { background: radial-gradient(circle at 30% 30%, #fff, #ffcc00); color: #000; box-shadow: 0 0 30px #ffcc00; }
+        /* LAMPBOARD (Industrial Recessed Holes) */
+        .lamp-bay { display: grid; grid-template-columns: repeat(9, 1fr); gap: 15px; margin-bottom: 35px; }
         
-        .tape-readout { background: var(--tape-paper); color: #222; padding: 10px; font-size: 18px; letter-spacing: 4px; border-radius: 2px; min-height: 20px; text-align: left; margin-bottom: 8px; border-left: 8px solid #34495e; text-transform: uppercase; }
-        #output-tape { border-left: 8px solid var(--gold-leaf); }
+        .lamp-hole { 
+            width: 52px; 
+            height: 52px; 
+            border-radius: 50%; 
+            /* Radial gradient makes it look like a hole in metal */
+            background: radial-gradient(circle at 30% 30%, #333, #111);
+            border: 3px solid #111; 
+            line-height: 52px; 
+            text-align: center; 
+            font-size: 20px; 
+            color: #5d5d5d; /* Dim when unlit */
+            position: relative;
+            box-shadow: inset 0 5px 10px #000, 0 1px 2px rgba(255,255,255,0.1);
+            transition: color 0.05s ease;
+        }
 
-        .plugboard { background: #050505; padding: 15px; border-radius: 4px; position: relative; }
-        .socket-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 10px; z-index: 2; position: relative; }
-        .socket { width: 25px; height: 25px; background: #000; border: 3px solid #444; border-radius: 50%; cursor: pointer; }
-        .socket.active { border-color: #fff; box-shadow: 0 0 10px #fff; }
+        .lamp-hole.lit { 
+            /* Glowing lamp filiment */
+            background: radial-gradient(circle at 30% 30%, #fff, var(--bulb-glow));
+            color: #000; 
+            box-shadow: 0 0 40px var(--bulb-glow), 0 0 10px #fff;
+            border-color: #fff;
+        }
+
+        /* KEYBOARD (Bakelite Typewriter Keys) */
+        .keyboard-visual {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 12px;
+            margin-bottom: 35px;
+            justify-items: center;
+        }
+        
+        .key {
+            width: 48px;
+            height: 48px;
+            background-color: var(--key-top);
+            background-image: linear-gradient(145deg, var(--key-top), var(--key-side));
+            border: 2px solid #000;
+            border-radius: 50%;
+            color: #fff;
+            text-align: center;
+            line-height: 48px;
+            font-size: 18px;
+            box-shadow: 0 6px 0 var(--key-side), 0 10px 20px rgba(0,0,0,0.4);
+            cursor: default;
+        }
+
+        /* Paper Tapes (Integrated History) */
+        .tape-container { width: 90%; margin: 0 auto 30px auto; }
+        .tape-readout { 
+            background: var(--tape-paper); color: #222; padding: 12px; font-size: 18px; letter-spacing: 4px; 
+            border-radius: 2px; min-height: 20px; text-align: left; margin-bottom: 10px; border-left: 10px solid #34495e;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1); text-transform: uppercase;
+        }
+        #output-tape { border-left: 10px solid var(--gold-leaf); background: var(--tape-paper); }
+        #input-tape { border-left: 10px solid var(--tape-input); }
+
+        /* PLUGBOARD (Heavy Metal Patch Panel) */
+        .plugboard { background: #050505; padding: 25px; border-radius: 4px; position: relative; border: 3px solid #111;}
+        .socket-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 15px; z-index: 2; position: relative; }
+        .socket { width: 30px; height: 30px; background: #000; border: 4px solid var(--steel-dark); border-radius: 50%; cursor: pointer; }
+        .socket.active { border-color: #fff; box-shadow: 0 0 15px #fff; }
         #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
 
-        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
-        button { background: #3e2723; color: #d7ccc8; border: 2px solid #1b110b; padding: 8px 15px; border-radius: 3px; cursor: pointer; font-weight: bold; font-family: 'Special Elite', serif; font-size: 11px; box-shadow: 0 3px 0 #000; }
-        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
+        .controls { margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        button { 
+            background: #2b1d1d; color: #d7ccc8; border: 2px solid #1a1a1a; padding: 10px 20px; 
+            border-radius: 4px; cursor: pointer; font-weight: bold; font-family: 'Special Elite', serif; 
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 0 #111, 0 5px 10px rgba(0,0,0,0.3);
+        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #111; }
     </style>
 </head>
 <body onload="init()">
@@ -88,8 +190,12 @@
 
             <div class="lamp-bay" id="lamp-bay"></div>
 
-            <div id="input-tape" class="tape-readout"></div>
-            <div id="output-tape" class="tape-readout"></div>
+            <div class="tape-container">
+                <div id="input-tape" class="tape-readout"></div>
+                <div id="output-tape" class="tape-readout"></div>
+            </div>
+
+            <div class="keyboard-visual" id="kb-visual"></div>
 
             <div class="plugboard" id="p-container">
                 <canvas id="cable-canvas"></canvas>
@@ -98,7 +204,7 @@
 
             <div class="controls">
                 <button onclick="toggleLogic()" style="background:#1b5e20">TOGGLE LOGIC MONITOR</button>
-                <button onclick="fullReset()">RESET ROTORS</button>
+                <button onclick="fullReset()">RESET ROTORS (AAA)</button>
                 <button onclick="clearTapes()" style="background:#546e7a">CLEAR TAPES</button>
                 <button onclick="clearPlugs()" style="background:#263238">PULL CABLES</button>
             </div>
@@ -113,14 +219,17 @@
     let history = [];
     let plugMap = {};
     let selected = null;
-    const colors = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22"];
+    const colors = ["#c62828", "#1565c0", "#2e7d32", "#f9a825", "#6a1b9a", "#ef6c00"];
 
     function init() {
         const lb = document.getElementById('lamp-bay');
         const sg = document.getElementById('s-grid');
+        const kb = document.getElementById('kb-visual');
+        
         alpha.split('').forEach(c => {
             lb.innerHTML += `<div class="lamp-hole" id="L-${c}">${c}</div>`;
             sg.innerHTML += `<div style="display:flex; flex-direction:column; align-items:center;"><div class="socket" id="S-${c}" onclick="handlePlug('${c}')"></div><span style="font-size:9px; margin-top:2px">${c}</span></div>`;
+            kb.innerHTML += `<div class="key">${c}</div>`;
         });
         window.addEventListener('resize', resizeCanvas);
         setTimeout(resizeCanvas, 100);
@@ -156,9 +265,9 @@
             if (drawn.has(s)) continue;
             const r1 = document.getElementById(`S-${s}`).getBoundingClientRect();
             const r2 = document.getElementById(`S-${plugMap[s]}`).getBoundingClientRect();
-            ctx.beginPath(); ctx.strokeStyle = colors[colorIdx % colors.length]; ctx.lineWidth = 3;
-            const x1 = r1.left - rect.left + 12; const y1 = r1.top - rect.top + 12;
-            const x2 = r2.left - rect.left + 12; const y2 = r2.top - rect.top + 12;
+            ctx.beginPath(); ctx.strokeStyle = colors[colorIdx % colors.length]; ctx.lineWidth = 4;
+            const x1 = r1.left - rect.left + 14; const y1 = r1.top - rect.top + 14;
+            const x2 = r2.left - rect.left + 14; const y2 = r2.top - rect.top + 14;
             ctx.moveTo(x1, y1); ctx.bezierCurveTo(x1, y1 + 60, x2, y2 + 60, x2, y2);
             ctx.stroke(); drawn.add(s); drawn.add(plugMap[s]); colorIdx++;
         }
