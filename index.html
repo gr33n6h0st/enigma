@@ -184,4 +184,150 @@
     <div class="enigma-chassis">
         <div class="faceplate">
             <div class="rotor-section">
-                <div class="rotor-slot"><div id="rL"
+                <div class="rotor-slot"><div id="rL" class="rotor-wheel" onclick="manualStep(0)">A</div></div>
+                <div class="rotor-slot"><div id="rM" class="rotor-wheel" onclick="manualStep(1)">A</div></div>
+                <div class="rotor-slot"><div id="rR" class="rotor-wheel" onclick="manualStep(2)">A</div></div>
+            </div>
+
+            <div class="lamp-bay" id="lamp-bay"></div>
+
+            <div style="font-size: 10px; color: #666; margin-bottom: 5px;">INPUT / OUTPUT TAPE</div>
+            <div id="tape" class="tape-readout"></div>
+
+            <div class="keyboard" id="kb-visual"></div>
+
+            <div class="plugboard" id="p-container">
+                <canvas id="cable-canvas"></canvas>
+                <div class="socket-grid" id="s-grid"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const rotors = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "BDFHJLCPRTXVZNYEIWGAKMUSQO"];
+    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+    let p = [0, 0, 0];
+    let history = [];
+    let plugMap = {};
+    let selected = null;
+
+    function init() {
+        const lb = document.getElementById('lamp-bay');
+        const sg = document.getElementById('s-grid');
+        const kb = document.getElementById('kb-visual');
+        
+        alpha.split('').forEach(c => {
+            lb.innerHTML += `<div class="lamp-hole" id="L-${c}">${c}</div>`;
+            sg.innerHTML += `<div class="socket-pair">
+                                <div class="socket" id="S-${c}" onclick="handlePlug('${c}')"></div>
+                                <span style="font-size:10px">${c}</span>
+                             </div>`;
+            kb.innerHTML += `<div class="key">${c}</div>`;
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+        updateUI();
+    }
+
+    function handlePlug(c) {
+        if (plugMap[c]) {
+            const partner = plugMap[c];
+            delete plugMap[c]; delete plugMap[partner];
+        } else if (selected === null) {
+            selected = c;
+            document.getElementById(`S-${c}`).classList.add('active');
+        } else {
+            if (selected !== c) {
+                plugMap[selected] = c;
+                plugMap[c] = selected;
+            }
+            document.getElementById(`S-${selected}`).classList.remove('active');
+            selected = null;
+        }
+        drawCables();
+    }
+
+    function drawCables() {
+        const canvas = document.getElementById('cable-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const drawn = new Set();
+        const rect = canvas.getBoundingClientRect();
+
+        for (let s in plugMap) {
+            if (drawn.has(s)) continue;
+            const r1 = document.getElementById(`S-${s}`).getBoundingClientRect();
+            const r2 = document.getElementById(`S-${plugMap[s]}`).getBoundingClientRect();
+            ctx.beginPath();
+            ctx.strokeStyle = "#222"; // Dark thick cables
+            ctx.lineWidth = 6;
+            const x1 = r1.left - rect.left + 15;
+            const y1 = r1.top - rect.top + 15;
+            const x2 = r2.left - rect.left + 15;
+            const y2 = r2.top - rect.top + 15;
+            ctx.moveTo(x1, y1);
+            ctx.bezierCurveTo(x1, y1 + 80, x2, y2 + 80, x2, y2);
+            ctx.stroke();
+            drawn.add(s); drawn.add(plugMap[s]);
+        }
+    }
+
+    function run(char) {
+        history.push([...p]);
+        let c = plugMap[char] || char;
+        p[2] = (p[2] + 1) % 26;
+        if (p[2] === 17) p[1] = (p[1] + 1) % 26;
+        updateUI();
+        let idx = alpha.indexOf(c);
+        for (let i = 2; i >= 0; i--) {
+            idx = (idx + p[i]) % 26;
+            idx = alpha.indexOf(rotors[i][idx]);
+            idx = (idx - p[i] + 26) % 26;
+        }
+        idx = alpha.indexOf(reflector[idx]);
+        for (let i = 0; i <= 2; i++) {
+            idx = (idx + p[i]) % 26;
+            idx = rotors[i].indexOf(alpha[idx]);
+            idx = (idx - p[i] + 26) % 26;
+        }
+        return plugMap[alpha[idx]] || alpha[idx];
+    }
+
+    function updateUI() {
+        document.getElementById('rL').innerText = alpha[p[0]];
+        document.getElementById('rM').innerText = alpha[p[1]];
+        document.getElementById('rR').innerText = alpha[p[2]];
+    }
+
+    function manualStep(i) { p[i] = (p[i] + 1) % 26; history = []; updateUI(); }
+
+    function resizeCanvas() {
+        const c = document.getElementById('cable-canvas');
+        const container = document.getElementById('p-container');
+        c.width = container.offsetWidth; c.height = container.offsetHeight;
+        drawCables();
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Backspace") {
+            if (history.length > 0) {
+                p = history.pop();
+                document.getElementById('tape').innerText = document.getElementById('tape').innerText.slice(0,-1);
+                updateUI();
+                document.querySelectorAll('.lamp-hole').forEach(l => l.classList.remove('lit'));
+            }
+            e.preventDefault(); return;
+        }
+        const char = e.key.toUpperCase();
+        if (alpha.includes(char) && char.length === 1) {
+            document.querySelectorAll('.lamp-hole').forEach(l => l.classList.remove('lit'));
+            const res = run(char);
+            document.getElementById(`L-${res}`).classList.add('lit');
+            document.getElementById('tape').innerText += res;
+        }
+    });
+</script>
+</body>
+</html>
