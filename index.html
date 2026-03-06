@@ -2,330 +2,186 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma M3: Engineering Edition</title>
+    <title>Enigma M3: Engineering Lab</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
         :root {
-            --wood: #3e2723;
-            --metal: #37474f;
-            --gold: #ffc107;
-            --lamp-off: #222;
-            --bakelite: #1a1a1a;
+            --enigma-dark: #1a1a1b;
+            --metal-grey: #2c2c2e;
+            --gold-leaf: #d4af37;
+            --bakelite: #0d0d0d;
         }
 
         body {
-            background-image: radial-gradient(circle, #444, #111);
-            color: #eceff1;
-            font-family: 'Special Elite', 'Courier New', serif;
+            background: #050505;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            margin: 0;
+            padding: 40px;
+            font-family: 'Special Elite', serif;
+            color: #ccc;
         }
 
-        /* The Main Case */
-        .enigma-case {
-            background: var(--wood);
-            border: 12px solid #2b1d1d;
-            border-radius: 8px;
+        /* The Main Wooden Case with Internal Metal Faceplate */
+        .enigma-chassis {
+            background: #3d2b1f; /* Wood texture */
+            border: 15px solid #261a13;
+            border-radius: 4px;
             padding: 40px;
-            width: 900px;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            width: 820px;
+            box-shadow: 0 60px 100px rgba(0,0,0,0.9);
             position: relative;
         }
 
-        /* Rotors Window */
-        .rotor-panel {
+        .faceplate {
+            background: radial-gradient(circle, #333 0%, #111 100%);
+            border: 4px solid #000;
+            padding: 30px;
+            border-radius: 2px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,1);
+        }
+
+        /* Authentically Notched Rotors */
+        .rotor-section {
             display: flex;
             justify-content: center;
-            gap: 40px;
-            background: var(--metal);
-            padding: 20px;
-            border-radius: 4px;
-            border-bottom: 4px solid #263238;
-            margin-bottom: 30px;
-            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
-        .rotor-unit { text-align: center; }
-        .rotor-display {
-            background: #fff;
-            color: #000;
-            font-size: 42px;
-            font-weight: bold;
+        .rotor-slot {
+            background: #000;
             padding: 10px;
+            border: 3px solid #444;
+            border-radius: 5px;
+            box-shadow: inset 0 10px 10px #000;
+        }
+
+        .rotor-wheel {
+            background: linear-gradient(to bottom, #444 0%, #eee 40%, #eee 60%, #444 100%);
+            color: #000;
+            font-size: 38px;
+            font-weight: bold;
             width: 60px;
-            border-radius: 4px;
-            border: 3px solid #000;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
             cursor: pointer;
             user-select: none;
-            box-shadow: 0 4px 0 #999;
+            border-left: 4px solid #333;
+            border-right: 4px solid #333;
         }
-        .rotor-label { font-size: 14px; margin-top: 10px; color: #cfd8dc; letter-spacing: 2px; }
 
-        /* Lampboard (The glowing bulbs) */
-        .lampboard {
+        /* Lampboard with Recessed Holes */
+        .lamp-bay {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
             gap: 15px;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
+            margin-bottom: 40px;
         }
 
-        .lamp {
-            width: 50px;
-            height: 50px;
+        .lamp-hole {
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
-            background: var(--lamp-off);
-            border: 2px solid #000;
-            line-height: 50px;
+            background: #111;
+            border: 2px solid #333;
+            line-height: 55px;
             text-align: center;
-            font-weight: bold;
+            font-size: 22px;
             color: #444;
-            font-size: 20px;
-            transition: all 0.05s ease;
+            position: relative;
+            box-shadow: inset 0 5px 10px #000;
         }
 
-        .lamp.active {
-            background: radial-gradient(circle, #fff700, #ffa200);
+        .lamp-hole.lit {
+            background: radial-gradient(circle, #fff, #ffcc00);
             color: #000;
-            box-shadow: 0 0 30px #ffae00, 0 0 10px #fff;
-            border-color: #fff;
+            box-shadow: 0 0 40px #ffcc00, inset 0 0 5px #fff;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
         }
 
-        /* Tapes (The Paper Output) */
-        .tape-container { margin-bottom: 25px; }
-        .tape-label { font-size: 11px; color: #90a4ae; margin-left: 10px; margin-bottom: 5px; }
-        .paper-tape {
-            background: #f5f5f5;
-            color: #333;
-            padding: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 6px;
-            border-radius: 2px;
-            width: 95%;
-            margin: 0 auto 10px;
-            min-height: 30px;
-            overflow-x: auto;
-            white-space: nowrap;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            border-left: 15px solid #3498db;
+        /* Authentic Stepped Keyboard Keys */
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin-bottom: 40px;
+            justify-items: center;
         }
-        #output-tape { border-left: 15px solid var(--gold); background: #fff; }
 
-        /* Plugboard (Patch Panel) */
+        .key {
+            width: 45px;
+            height: 45px;
+            background: #111;
+            border: 3px solid #444;
+            border-radius: 50%;
+            color: #fff;
+            text-align: center;
+            line-height: 45px;
+            font-size: 18px;
+            box-shadow: 0 5px 0 #000;
+            cursor: default;
+        }
+
+        /* Plugboard Sockets at the bottom */
         .plugboard {
-            background: var(--bakelite);
-            padding: 30px;
-            border-radius: 5px;
-            border: 3px solid #333;
+            background: #050505;
+            padding: 25px;
+            border-radius: 4px;
             position: relative;
         }
 
         .socket-grid {
             display: grid;
             grid-template-columns: repeat(13, 1fr);
-            gap: 20px;
-            position: relative;
+            gap: 15px;
             z-index: 2;
+            position: relative;
+        }
+
+        .socket-pair {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
         }
 
         .socket {
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             background: #000;
             border: 3px solid #555;
             border-radius: 50%;
             cursor: pointer;
-            color: #777;
-            font-size: 12px;
-            line-height: 36px;
-            text-align: center;
+            box-shadow: inset 0 2px 5px #000;
         }
 
-        .socket.selected { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
+        .socket.active { border-color: var(--gold-leaf); box-shadow: 0 0 10px var(--gold-leaf); }
+        
+        /* The Visual Tapes (Message History) */
+        .tape-readout {
+            background: #fdfae6;
+            color: #222;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            letter-spacing: 5px;
+            border-radius: 2px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 25px;
+            text-align: left;
+        }
+
         #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
-
-        .btn-group { margin-top: 30px; display: flex; gap: 15px; }
-        button {
-            background: #5d4037;
-            color: #fff;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 0 #2b1d1d;
-        }
-        button:hover { background: #795548; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #2b1d1d; }
-
-        .hint { margin-top: 20px; color: #607d8b; font-size: 14px; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
 </head>
 <body onload="init()">
 
-    <div class="enigma-case">
-        <div class="rotor-panel">
-            <div class="rotor-unit"><div id="rL" class="rotor-display" onclick="manualStep(0)">A</div><div class="rotor-label">LEFT</div></div>
-            <div class="rotor-unit"><div id="rM" class="rotor-display" onclick="manualStep(1)">A</div><div class="rotor-label">MIDDLE</div></div>
-            <div class="rotor-unit"><div id="rR" class="rotor-display" onclick="manualStep(2)">A</div><div class="rotor-label">RIGHT</div></div>
-        </div>
-
-        <div class="lampboard" id="lampboard"></div>
-
-        <div class="tape-container">
-            <div class="tape-label">INPUT (KEYBOARD)</div>
-            <div id="input-tape" class="paper-tape"></div>
-            <div class="tape-label">OUTPUT (ENCRYPTED)</div>
-            <div id="output-tape" class="paper-tape"></div>
-        </div>
-
-        <div class="plugboard" id="p-container">
-            <canvas id="cable-canvas"></canvas>
-            <div class="socket-grid" id="s-grid"></div>
-        </div>
-
-        <div class="btn-group">
-            <button onclick="fullReset()">FACTORY RESET</button>
-            <button onclick="clearPlugs()" style="background:#455a64">PULL ALL CABLES</button>
-        </div>
-    </div>
-
-    <div class="hint">Use your physical keyboard. <b>Backspace</b> to correct errors. Click rotors to set starting key.</div>
-
-<script>
-    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const rotors = ["EKMFLGDQVZNTOWYHXUSPAIBRCJ", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "BDFHJLCPRTXVZNYEIWGAKMUSQO"];
-    const reflector = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
-
-    let p = [0, 0, 0];
-    let history = [];
-    let plugMap = {};
-    let selected = null;
-    const cableColors = ["#f44336", "#2196f3", "#4caf50", "#ffeb3b", "#9c27b0", "#ff9800", "#00bcd4"];
-
-    function init() {
-        const lb = document.getElementById('lampboard');
-        const sg = document.getElementById('s-grid');
-        alpha.split('').forEach(c => {
-            lb.innerHTML += `<div class="lamp" id="L-${c}">${c}</div>`;
-            sg.innerHTML += `<div class="socket" id="S-${c}" onclick="handlePlug('${c}')">${c}</div>`;
-        });
-        window.addEventListener('resize', resizeCanvas);
-        setTimeout(resizeCanvas, 100);
-        updateUI();
-    }
-
-    function handlePlug(c) {
-        if (plugMap[c]) {
-            const partner = plugMap[c];
-            delete plugMap[c]; delete plugMap[partner];
-        } else if (selected === null) {
-            selected = c;
-            document.getElementById(`S-${c}`).classList.add('selected');
-        } else {
-            if (selected !== c) {
-                plugMap[selected] = c;
-                plugMap[c] = selected;
-            }
-            document.getElementById(`S-${selected}`).classList.remove('selected');
-            selected = null;
-        }
-        drawCables();
-    }
-
-    function drawCables() {
-        const canvas = document.getElementById('cable-canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const drawn = new Set();
-        const rect = canvas.getBoundingClientRect();
-        let colorIdx = 0;
-
-        for (let s in plugMap) {
-            if (drawn.has(s)) continue;
-            const r1 = document.getElementById(`S-${s}`).getBoundingClientRect();
-            const r2 = document.getElementById(`S-${plugMap[s]}`).getBoundingClientRect();
-            ctx.beginPath();
-            ctx.strokeStyle = cableColors[colorIdx % cableColors.length];
-            ctx.lineWidth = 5;
-            const x1 = r1.left - rect.left + 18;
-            const y1 = r1.top - rect.top + 18;
-            const x2 = r2.left - rect.left + 18;
-            const y2 = r2.top - rect.top + 18;
-            ctx.moveTo(x1, y1);
-            ctx.bezierCurveTo(x1, y1 + 60, x2, y2 + 60, x2, y2);
-            ctx.stroke();
-            drawn.add(s); drawn.add(plugMap[s]);
-            colorIdx++;
-        }
-    }
-
-    function run(char) {
-        history.push([...p]);
-        let c = plugMap[char] || char;
-        
-        // Stepping
-        p[2] = (p[2] + 1) % 26;
-        if (p[2] === 17) p[1] = (p[1] + 1) % 26;
-        updateUI();
-
-        let idx = alpha.indexOf(c);
-        for (let i = 2; i >= 0; i--) {
-            idx = (idx + p[i]) % 26;
-            idx = alpha.indexOf(rotors[i][idx]);
-            idx = (idx - p[i] + 26) % 26;
-        }
-        idx = alpha.indexOf(reflector[idx]);
-        for (let i = 0; i <= 2; i++) {
-            idx = (idx + p[i]) % 26;
-            idx = rotors[i].indexOf(alpha[idx]);
-            idx = (idx - p[i] + 26) % 26;
-        }
-        return plugMap[alpha[idx]] || alpha[idx];
-    }
-
-    function updateUI() {
-        document.getElementById('rL').innerText = alpha[p[0]];
-        document.getElementById('rM').innerText = alpha[p[1]];
-        document.getElementById('rR').innerText = alpha[p[2]];
-    }
-
-    function manualStep(i) { p[i] = (p[i] + 1) % 26; history = []; updateUI(); }
-    function fullReset() { p = [0,0,0]; history = []; document.getElementById('input-tape').innerText = ""; document.getElementById('output-tape').innerText = ""; updateUI(); }
-    function clearPlugs() { plugMap = {}; drawCables(); }
-    function resizeCanvas() { 
-        const c = document.getElementById('cable-canvas');
-        const container = document.getElementById('p-container');
-        c.width = container.offsetWidth; c.height = container.offsetHeight;
-        drawCables();
-    }
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === "Backspace") {
-            if (history.length > 0) {
-                p = history.pop();
-                document.getElementById('input-tape').innerText = document.getElementById('input-tape').innerText.slice(0,-1);
-                document.getElementById('output-tape').innerText = document.getElementById('output-tape').innerText.slice(0,-1);
-                updateUI();
-                document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
-            }
-            e.preventDefault(); return;
-        }
-        const char = e.key.toUpperCase();
-        if (alpha.includes(char) && char.length === 1) {
-            document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
-            const res = run(char);
-            document.getElementById(`L-${res}`).classList.add('active');
-            document.getElementById('input-tape').innerText += char;
-            document.getElementById('output-tape').innerText += res;
-        }
-    });
-</script>
-</body>
-</html>
+    <div class="enigma-chassis">
+        <div class="faceplate">
+            <div class="rotor-section">
+                <div class="rotor-slot"><div id="rL"
