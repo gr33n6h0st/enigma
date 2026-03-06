@@ -2,70 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma Engineering Lab: Hardware Interface</title>
+    <title>Enigma M3 Engineering Simulator</title>
     <style>
-        :root { --panel-bg: #2c3e50; --gold: #f1c40f; --lamp-off: #333; }
-        body { font-family: 'Segoe UI', 'Courier New', monospace; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        :root { --panel: #2c3e50; --gold: #f1c40f; --lamp-off: #333; --socket: #111; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
         
-        .enigma-body { background: var(--panel-bg); border: 10px solid #111; border-radius: 10px; padding: 25px; width: 850px; box-shadow: 0 0 50px black; position: relative; }
+        .machine-case { background: var(--panel); border: 8px solid #111; border-radius: 12px; padding: 25px; width: 850px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); position: relative; }
         
         /* Rotors */
-        .rotor-section { display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; background: #222; padding: 15px; border-radius: 5px; border: 2px solid #444; }
+        .rotor-bay { display: flex; justify-content: center; gap: 30px; margin-bottom: 25px; background: #1a1a1a; padding: 20px; border-radius: 8px; border: 2px solid #444; }
         .rotor-unit { text-align: center; }
-        .rotor-val { background: #fff; color: #000; font-size: 32px; font-weight: bold; padding: 10px; border-radius: 5px; width: 50px; cursor: pointer; border-bottom: 5px solid #888; user-select: none; }
-        
-        /* Tapes */
-        .tape-container { width: 90%; margin: 10px auto; text-align: left; }
-        .tape { background: #fff; color: #222; padding: 15px; min-height: 40px; font-size: 22px; font-weight: bold; letter-spacing: 4px; border-radius: 3px; border-left: 8px solid var(--gold); overflow-x: auto; white-space: nowrap; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
-        .input-label { font-size: 14px; color: #bdc3c7; margin-bottom: 5px; text-transform: uppercase; }
+        .rotor-val { background: #fff; color: #000; font-size: 36px; font-weight: bold; padding: 10px; border-radius: 6px; width: 55px; cursor: pointer; border-bottom: 6px solid #888; user-select: none; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.2); }
+        .rotor-label { font-size: 12px; color: #95a5a6; margin-top: 8px; font-weight: bold; }
 
         /* Lampboard */
-        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin: 25px 0; }
-        .lamp { width: 45px; height: 45px; border-radius: 50%; background: var(--lamp-off); border: 2px solid #111; line-height: 45px; text-align: center; font-weight: bold; color: #555; font-size: 18px; }
-        .lamp.active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); }
+        .lampboard { display: grid; grid-template-columns: repeat(9, 1fr); gap: 12px; margin: 25px 0; }
+        .lamp { width: 45px; height: 45px; border-radius: 50%; background: var(--lamp-off); border: 2px solid #111; line-height: 45px; text-align: center; font-weight: bold; color: #555; font-size: 18px; transition: background 0.05s; }
+        .lamp.active { background: var(--gold); color: black; box-shadow: 0 0 25px var(--gold); border-color: #fff; }
+
+        /* Output Tape */
+        .tape-area { width: 100%; margin-bottom: 20px; }
+        .tape { background: #fdfdfd; color: #111; padding: 18px; min-height: 35px; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 4px; border-left: 10px solid var(--gold); overflow-x: auto; white-space: nowrap; font-family: 'Courier New', monospace; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1); }
 
         /* Plugboard */
-        .plugboard-container { position: relative; background: #111; padding: 25px; border-radius: 5px; border: 2px solid #444; }
-        .plug-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 15px; position: relative; z-index: 2; }
-        .socket { width: 32px; height: 32px; border-radius: 50%; background: #000; border: 2px solid #7f8c8d; cursor: pointer; font-size: 12px; line-height: 32px; text-align: center; user-select: none; }
-        .socket.selected { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .plugboard-box { position: relative; background: #000; padding: 30px; border-radius: 8px; border: 2px solid #444; }
+        .plug-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 18px; position: relative; z-index: 2; }
+        .socket { width: 34px; height: 34px; border-radius: 50%; background: #222; border: 2px solid #7f8c8d; cursor: pointer; font-size: 11px; line-height: 34px; text-align: center; user-select: none; color: #95a5a6; }
+        .socket.selected { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); color: white; }
         #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
         
-        .controls { margin-top: 20px; }
-        button { background: #c0392b; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 5px; font-weight: bold; margin: 5px; transition: 0.2s; }
+        .btns { margin-top: 25px; display: flex; gap: 10px; }
+        button { background: #c0392b; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 14px; }
         button:hover { background: #e74c3c; }
+        .hint { margin-top: 15px; color: #7f8c8d; font-size: 13px; }
     </style>
 </head>
 <body onload="init()">
 
-    <h1>ENIGMA M3: ENGINEERING SIMULATOR</h1>
-
-    <div class="enigma-body">
-        <div class="rotor-section">
-            <div class="rotor-unit"><div id="rL" class="rotor-val" onclick="manualStep(0)">A</div><small>LEFT</small></div>
-            <div class="rotor-unit"><div id="rM" class="rotor-val" onclick="manualStep(1)">A</div><small>MIDDLE</small></div>
-            <div class="rotor-unit"><div id="rR" class="rotor-val" onclick="manualStep(2)">A</div><small>RIGHT</small></div>
+    <h2 style="margin-bottom: 10px;">ENIGMA M3 ENGINEERING LAB</h2>
+    <div class="machine-case">
+        
+        <div class="rotor-bay">
+            <div class="rotor-unit"><div id="rL" class="rotor-val" onclick="manualStep(0)">A</div><div class="rotor-label">LEFT (k)</div></div>
+            <div class="rotor-unit"><div id="rM" class="rotor-val" onclick="manualStep(1)">A</div><div class="rotor-label">MIDDLE (j)</div></div>
+            <div class="rotor-unit"><div id="rR" class="rotor-val" onclick="manualStep(2)">A</div><div class="rotor-label">RIGHT (n)</div></div>
         </div>
 
         <div class="lampboard" id="lboard"></div>
 
-        <div class="tape-container">
-            <div class="input-label">Machine Output (Type on your keyboard):</div>
+        <div class="tape-area">
             <div id="tape" class="tape"></div>
         </div>
 
-        <div class="plugboard-container" id="p-container">
+        <div class="plugboard-box" id="p-container">
             <canvas id="cable-canvas"></canvas>
             <div class="plug-grid" id="pgrid"></div>
         </div>
 
-        <div class="controls">
+        <div class="btns">
             <button onclick="fullReset()">FULL RESET (AAA)</button>
-            <button onclick="clearPlugs()" style="background:#34495e">CLEAR PLUGBOARD</button>
+            <button onclick="clearPlugs()" style="background:#34495e">REMOVE CABLES</button>
+            <button onclick="clearTape()" style="background:#7f8c8d">CLEAR TAPE</button>
         </div>
     </div>
 
-    <p style="color: #7f8c8d; margin-top: 20px;">Backspace will "un-spin" the rotors to let you correct mistakes.</p>
+    <div class="hint">Type on your keyboard. <b>Backspace</b> to undo/edit. Click rotors to set start position.</div>
 
 <script>
     const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -73,10 +74,10 @@
     const reflect = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
     
     let p = [0, 0, 0];
-    let history = []; // Stores rotor positions for every keypress
+    let history = []; 
     let plugMap = {};
     let selectedSocket = null;
-    const colors = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22"];
+    const colors = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#1abc9c", "#d35400"];
 
     const canvas = document.getElementById('cable-canvas');
     const ctx = canvas.getContext('2d');
@@ -88,7 +89,8 @@
             lb.innerHTML += `<div class="lamp" id="lamp-${c}">${c}</div>`;
             pg.innerHTML += `<div class="socket" id="plug-${c}" onclick="handlePlug('${c}')">${c}</div>`;
         });
-        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100); 
         updateUI();
     }
 
@@ -124,35 +126,36 @@
             ctx.beginPath();
             ctx.strokeStyle = colors[colorIdx % colors.length];
             ctx.lineWidth = 4;
+            ctx.lineJoin = 'round';
             
-            const x1 = r1.left - cRect.left + 16;
-            const y1 = r1.top - cRect.top + 16;
-            const x2 = r2.left - cRect.left + 16;
-            const y2 = r2.top - cRect.top + 16;
+            const x1 = r1.left - cRect.left + (r1.width/2);
+            const y1 = r1.top - cRect.top + (r1.height/2);
+            const x2 = r2.left - cRect.left + (r2.width/2);
+            const y2 = r2.top - cRect.top + (r2.height/2);
 
             ctx.moveTo(x1, y1);
-            ctx.bezierCurveTo(x1, y1 + 50, x2, y2 + 50, x2, y2);
+            ctx.bezierCurveTo(x1, y1 + 60, x2, y2 + 60, x2, y2);
             ctx.stroke();
 
-            drawn.add(s);
-            drawn.add(plugMap[s]);
+            drawn.add(s); drawn.add(plugMap[s]);
             colorIdx++;
         }
     }
 
     function run(char) {
-        // Save current state BEFORE moving
-        history.push([...p]);
+        history.push([...p]); // Save state for Backspace undo
 
         let c = plugMap[char] || char;
         
-        // Rotor Stepping
+        // Rotor Stepping (Right rotor always, middle on turnover)
         p[2] = (p[2] + 1) % 26;
-        if (p[2] === 17) p[1] = (p[1] + 1) % 26;
+        if (p[2] === 17) p[1] = (p[1] + 1) % 26; // Rotor III turnover at 'Q'
+        if (p[1] === 5 && p[2] === 18) p[0] = (p[0] + 1) % 26; // Middle turnover
+
         updateUI();
 
         let idx = alpha.indexOf(c);
-        // Forward
+        // Forward through rotors R -> M -> L
         for (let i = 2; i >= 0; i--) {
             idx = (idx + p[i]) % 26;
             idx = alpha.indexOf(wiring[i][idx]);
@@ -160,22 +163,13 @@
         }
         // Reflector
         idx = alpha.indexOf(reflect[idx]);
-        // Backward
+        // Backward through rotors L -> M -> R
         for (let i = 0; i <= 2; i++) {
             idx = (idx + p[i]) % 26;
             idx = wiring[i].indexOf(alpha[idx]);
             idx = (idx - p[i] + 26) % 26;
         }
         return plugMap[alpha[idx]] || alpha[idx];
-    }
-
-    function undo() {
-        if (history.length > 0) {
-            p = history.pop(); // Revert to previous state
-            const tape = document.getElementById('tape');
-            tape.innerText = tape.innerText.slice(0, -1);
-            updateUI();
-        }
     }
 
     function updateUI() {
@@ -185,8 +179,10 @@
     }
 
     function manualStep(i) { p[i] = (p[i] + 1) % 26; history = []; updateUI(); }
+    function clearTape() { document.getElementById('tape').innerText = ""; history = []; }
     function fullReset() { p = [0,0,0]; history = []; document.getElementById('tape').innerText = ""; updateUI(); }
     function clearPlugs() { plugMap = {}; drawCables(); }
+    
     function resizeCanvas() { 
         const container = document.getElementById('p-container');
         canvas.width = container.offsetWidth;
@@ -196,7 +192,14 @@
 
     window.addEventListener('keydown', (e) => {
         if (e.key === "Backspace") {
-            undo();
+            if (history.length > 0) {
+                p = history.pop();
+                const t = document.getElementById('tape');
+                t.innerText = t.innerText.slice(0, -1);
+                updateUI();
+                document.querySelectorAll('.lamp').forEach(l => l.classList.remove('active'));
+            }
+            e.preventDefault();
             return;
         }
         const char = e.key.toUpperCase();
@@ -207,8 +210,6 @@
             document.getElementById('tape').innerText += out;
         }
     });
-
-    window.onresize = resizeCanvas;
 </script>
 </body>
 </html>
