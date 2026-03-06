@@ -2,106 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enigma M3: Final Engineering Lab</title>
+    <title>Enigma M3: Engineering Lab</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Fira+Code:wght@400;700&display=swap');
 
         :root {
-            --wood-frame: #2d1b0d;
-            --gold-leaf: #d4af37;
-            --tape-paper: #fdfae6;
+            --steel-dark: #1a1a1a;
+            --steel-brushed: #3a3a3a;
             --logic-green: #00ff41;
+            --lamp-glow: #ffcc00;
         }
 
         body {
-            background: #0a0a0a;
+            background: #0d0d0d;
+            color: #ddd;
+            font-family: 'Special Elite', serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            font-family: 'Special Elite', serif;
-            color: #ddd;
+            padding: 15px;
+            margin: 0;
         }
 
         .enigma-chassis {
-            background: linear-gradient(145deg, #4e342e, #261a13);
-            border: 12px solid #1a0f08;
+            background: linear-gradient(145deg, #2a2a2a, #111);
+            border: 8px solid #000;
             border-radius: 4px;
-            padding: 30px;
-            width: 850px;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
-        }
-
-        .faceplate {
-            background: radial-gradient(circle, #333 0%, #111 100%);
-            border: 4px solid #000;
             padding: 20px;
-            border-radius: 2px;
-            box-shadow: inset 0 0 40px rgba(0,0,0,1);
+            width: 820px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
 
         .logic-monitor { 
-            background: #000; border: 2px solid #444; border-radius: 4px; padding: 12px; margin-bottom: 20px; 
+            background: #000; border: 1px solid #333; border-radius: 3px; padding: 12px; margin-bottom: 20px; 
             font-family: 'Fira Code', monospace; font-size: 11px; color: var(--logic-green); display: none; 
-            border-left: 5px solid var(--logic-green); line-height: 1.4; max-height: 250px; overflow-y: auto;
+            border-left: 4px solid var(--logic-green); line-height: 1.5; max-height: 250px; overflow-y: auto;
         }
 
-        /* ROTOR SECTION */
-        .rotor-section { display: flex; justify-content: center; gap: 25px; margin-bottom: 20px; }
+        .rotor-section { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
         .rotor-container { text-align: center; }
-        .rotor-name { font-size: 14px; color: var(--gold-leaf); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; }
-        .rotor-slot { background: #000; padding: 5px; border: 3px solid #333; border-radius: 4px; overflow: hidden; height: 80px; width: 60px; position: relative; box-shadow: inset 0 10px 10px #000; }
-        .rotor-wheel { position: absolute; width: 100%; height: 100%; background: linear-gradient(to bottom, #333 0%, #eee 45%, #eee 55%, #333 100%); color: #000; font-size: 40px; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; }
-        
-        .spin-down { animation: clickDown 0.15s; }
-        @keyframes clickDown { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        .rotor-name { font-size: 12px; color: #888; margin-bottom: 4px; font-weight: bold; }
+        .rotor-slot { 
+            background: #000; padding: 4px; border: 2px solid #222; border-radius: 3px; 
+            overflow: hidden; height: 65px; width: 50px; position: relative; 
+            box-shadow: inset 0 8px 12px #000;
+        }
+        .rotor-wheel { 
+            position: absolute; width: 100%; height: 100%; 
+            background: linear-gradient(to bottom, #222 0%, #d1d1d1 45%, #d1d1d1 55%, #222 100%); 
+            color: #000; font-size: 32px; font-weight: bold; display: flex; 
+            align-items: center; justify-content: center; user-select: none;
+        }
 
-        .lamp-bay { display: grid; grid-template-columns: repeat(9, 1fr); gap: 10px; margin-bottom: 25px; }
-        .lamp-hole { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 2px solid #222; line-height: 45px; text-align: center; font-size: 18px; color: #444; box-shadow: inset 0 4px 8px #000; }
-        .lamp-hole.lit { background: radial-gradient(circle at 30% 30%, #fff, #ffcc00); color: #000; box-shadow: 0 0 30px #ffcc00; }
-        
-        .tape-readout { background: var(--tape-paper); color: #222; padding: 10px; font-size: 18px; letter-spacing: 4px; border-radius: 2px; min-height: 20px; text-align: left; margin-bottom: 8px; border-left: 8px solid #34495e; text-transform: uppercase; }
-        #output-tape { border-left: 8px solid var(--gold-leaf); }
+        .spin-down { animation: clickMove 0.12s ease-out; }
+        @keyframes clickMove { 0% { transform: translateY(-100%); } 100% { transform: translateY(0); } }
 
-        .plugboard { background: #050505; padding: 15px; border-radius: 4px; position: relative; }
+        .lamp-bay { display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; margin-bottom: 20px; }
+        .lamp-hole { 
+            width: 44px; height: 44px; border-radius: 50%; 
+            background: radial-gradient(circle at 30% 30%, #333, #050505);
+            border: 2px solid #111; line-height: 44px; text-align: center; 
+            font-size: 18px; color: #444; box-shadow: inset 0 4px 6px #000;
+        }
+        .lamp-hole.lit { 
+            background: radial-gradient(circle at 30% 30%, #fff, var(--lamp-glow));
+            color: #000; box-shadow: 0 0 25px var(--lamp-glow); border-color: #fff;
+        }
+
+        .tape-readout { 
+            background: #fdfae6; color: #222; padding: 8px; font-size: 16px; letter-spacing: 3px; 
+            border-radius: 2px; min-height: 18px; text-align: left; margin-bottom: 6px; 
+            border-left: 6px solid #34495e; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #output-tape { border-left: 6px solid #b08d57; }
+
+        .plugboard { background: #050505; padding: 15px; border-radius: 4px; position: relative; border: 2px solid #222;}
         .socket-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 10px; z-index: 2; position: relative; }
-        .socket { width: 25px; height: 25px; background: #000; border: 3px solid #444; border-radius: 50%; cursor: pointer; }
+        .socket { width: 24px; height: 24px; background: #000; border: 3px solid #333; border-radius: 50%; cursor: pointer; }
         .socket.active { border-color: #fff; box-shadow: 0 0 10px #fff; }
         #cable-canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; }
 
-        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
-        button { background: #3e2723; color: #d7ccc8; border: 2px solid #1b110b; padding: 8px 15px; border-radius: 3px; cursor: pointer; font-weight: bold; font-family: 'Special Elite', serif; font-size: 11px; box-shadow: 0 3px 0 #000; }
-        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
+        .controls { margin-top: 15px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        button { 
+            background: #2a2a2a; color: #ccc; border: 1px solid #444; padding: 8px 15px; 
+            border-radius: 2px; cursor: pointer; font-family: 'Special Elite', serif; font-size: 11px;
+        }
+        button:hover { background: #333; }
     </style>
 </head>
 <body onload="init()">
 
     <div class="enigma-chassis">
-        <div class="faceplate">
-            <div id="logic-box" class="logic-monitor">> MONITOR ACTIVE: WAITING FOR INPUT...</div>
+        <div id="logic-box" class="logic-monitor">> WAITING FOR HARDWARE INPUT...</div>
 
-            <div class="rotor-section">
-                <div class="rotor-container"><div class="rotor-name">I</div><div class="rotor-slot"><div id="rL" class="rotor-wheel" onclick="manualStep(0)">A</div></div></div>
-                <div class="rotor-container"><div class="rotor-name">II</div><div class="rotor-slot"><div id="rM" class="rotor-wheel" onclick="manualStep(1)">A</div></div></div>
-                <div class="rotor-container"><div class="rotor-name">III</div><div class="rotor-slot"><div id="rR" class="rotor-wheel" onclick="manualStep(2)">A</div></div></div>
-            </div>
+        <div class="rotor-section">
+            <div class="rotor-container"><div class="rotor-name">I</div><div class="rotor-slot"><div id="rL" class="rotor-wheel">A</div></div></div>
+            <div class="rotor-container"><div class="rotor-name">II</div><div class="rotor-slot"><div id="rM" class="rotor-wheel">A</div></div></div>
+            <div class="rotor-container"><div class="rotor-name">III</div><div class="rotor-slot"><div id="rR" class="rotor-wheel">A</div></div></div>
+        </div>
 
-            <div class="lamp-bay" id="lamp-bay"></div>
+        <div class="lamp-bay" id="lamp-bay"></div>
 
-            <div id="input-tape" class="tape-readout"></div>
-            <div id="output-tape" class="tape-readout"></div>
+        <div id="input-tape" class="tape-readout"></div>
+        <div id="output-tape" class="tape-readout"></div>
 
-            <div class="plugboard" id="p-container">
-                <canvas id="cable-canvas"></canvas>
-                <div class="socket-grid" id="s-grid"></div>
-            </div>
+        <div class="plugboard" id="p-container">
+            <canvas id="cable-canvas"></canvas>
+            <div class="socket-grid" id="s-grid"></div>
+        </div>
 
-            <div class="controls">
-                <button onclick="toggleLogic()" style="background:#1b5e20">TOGGLE LOGIC MONITOR</button>
-                <button onclick="fullReset()">RESET ROTORS</button>
-                <button onclick="clearTapes()" style="background:#546e7a">CLEAR TAPES</button>
-                <button onclick="clearPlugs()" style="background:#263238">PULL CABLES</button>
-            </div>
+        <div class="controls">
+            <button onclick="toggleLogic()" style="background:#1b5e20">TOGGLE LOGIC MONITOR</button>
+            <button onclick="fullReset()">RESET (AAA)</button>
+            <button onclick="clearTapes()" style="background:#455a64">CLEAR TAPES</button>
+            <button onclick="clearPlugs()" style="background:#263238">PULL CABLES</button>
         </div>
     </div>
 
@@ -148,6 +162,8 @@
     function drawCables() {
         const canvas = document.getElementById('cable-canvas');
         const ctx = canvas.getContext('2d');
+        const container = document.getElementById('p-container');
+        canvas.width = container.offsetWidth; canvas.height = container.offsetHeight;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const drawn = new Set();
         const rect = canvas.getBoundingClientRect();
@@ -159,7 +175,7 @@
             ctx.beginPath(); ctx.strokeStyle = colors[colorIdx % colors.length]; ctx.lineWidth = 3;
             const x1 = r1.left - rect.left + 12; const y1 = r1.top - rect.top + 12;
             const x2 = r2.left - rect.left + 12; const y2 = r2.top - rect.top + 12;
-            ctx.moveTo(x1, y1); ctx.bezierCurveTo(x1, y1 + 60, x2, y2 + 60, x2, y2);
+            ctx.moveTo(x1, y1); ctx.bezierCurveTo(x1, y1 + 50, x2, y2 + 50, x2, y2);
             ctx.stroke(); drawn.add(s); drawn.add(plugMap[s]); colorIdx++;
         }
     }
@@ -167,53 +183,46 @@
     function run(char) {
         history.push([...p]);
         let trace = [];
-        
         let current = plugMap[char] || char;
-        trace.push(`[PLUGBOARD] IN: ${char} -> OUT: ${current}`);
+        trace.push(`[PLUGBOARD] INPUT: ${char} -> SWAP: ${current}`);
         
         p[2] = (p[2] + 1) % 26;
         triggerSpin('rR');
         if (p[2] === 17) { 
-            p[1] = (p[1] + 1) % 26; 
-            triggerSpin('rM');
+            p[1] = (p[1] + 1) % 26; triggerSpin('rM');
             if (p[1] === 17) { p[0] = (p[0] + 1) % 26; triggerSpin('rL'); }
         }
         updateUI();
 
         let idx = alpha.indexOf(current);
-
         for (let i = 2; i >= 0; i--) {
-            let rNum = ['I','II','III'][i];
             idx = (idx + p[i]) % 26;
             let letterIn = alpha[idx];
             idx = alpha.indexOf(rotors[i][idx]);
             idx = (idx - p[i] + 26) % 26;
-            trace.push(`[ROTOR ${rNum}] FWD: ${letterIn} -> OUT: ${alpha[idx]}`);
+            trace.push(`[ROTOR ${['I','II','III'][i]}] FORWARD: ${letterIn} -> OUT: ${alpha[idx]}`);
         }
-
         let refIn = alpha[idx];
         idx = alpha.indexOf(reflector[idx]);
         trace.push(`[REFLECTOR] IN: ${refIn} -> OUT: ${alpha[idx]}`);
-
         for (let i = 0; i <= 2; i++) {
-            let rNum = ['I','II','III'][i];
             idx = (idx + p[i]) % 26;
             let letterIn = alpha[idx];
             idx = rotors[i].indexOf(alpha[idx]);
             idx = (idx - p[i] + 26) % 26;
-            trace.push(`[ROTOR ${rNum}] RET: ${letterIn} -> OUT: ${alpha[idx]}`);
+            trace.push(`[ROTOR ${['I','II','III'][i]}] RETURN: ${letterIn} -> OUT: ${alpha[idx]}`);
         }
-
-        let lampResult = plugMap[alpha[idx]] || alpha[idx];
-        trace.push(`[PLUGBOARD] IN: ${alpha[idx]} -> LAMP: ${lampResult}`);
-
-        document.getElementById('logic-box').innerHTML = "> SIGNAL TRACE:<br>" + trace.join("<br>");
-        return lampResult;
+        let res = plugMap[alpha[idx]] || alpha[idx];
+        trace.push(`[PLUGBOARD] RETURN: ${alpha[idx]} -> LAMP: ${res}`);
+        document.getElementById('logic-box').innerHTML = "> SIGNAL PATH:<br>" + trace.join("<br>");
+        return res;
     }
 
     function triggerSpin(id) {
         const el = document.getElementById(id);
-        el.classList.remove('spin-down'); void el.offsetWidth; el.classList.add('spin-down');
+        el.classList.remove('spin-down');
+        void el.offsetWidth;
+        el.classList.add('spin-down');
     }
 
     function updateUI() {
@@ -222,14 +231,10 @@
         document.getElementById('rR').innerText = alpha[p[2]];
     }
 
-    function fullReset() { p = [0,0,0]; history = []; updateUI(); document.getElementById('logic-box').innerHTML = "> SYSTEM RESET"; }
+    function fullReset() { p = [0,0,0]; history = []; updateUI(); document.getElementById('logic-box').innerHTML = "> RESET TO AAA"; }
     function clearTapes() { document.getElementById('input-tape').innerText = ""; document.getElementById('output-tape').innerText = ""; history = []; }
     function clearPlugs() { plugMap = {}; drawCables(); }
-    function manualStep(i) { p[i] = (p[i] + 1) % 26; triggerSpin(['rL','rM','rR'][i]); history = []; updateUI(); }
-    function resizeCanvas() { 
-        const c = document.getElementById('cable-canvas'); const container = document.getElementById('p-container');
-        c.width = container.offsetWidth; c.height = container.offsetHeight; drawCables();
-    }
+    function resizeCanvas() { drawCables(); }
 
     window.addEventListener('keydown', (e) => {
         if (e.key === "Backspace") {
@@ -238,7 +243,7 @@
                 document.getElementById('input-tape').innerText = document.getElementById('input-tape').innerText.slice(0,-1);
                 document.getElementById('output-tape').innerText = document.getElementById('output-tape').innerText.slice(0,-1);
                 updateUI(); document.querySelectorAll('.lamp-hole').forEach(l => l.classList.remove('lit'));
-                document.getElementById('logic-box').innerHTML = "> BACKSPACE: REVERTING STATE";
+                document.getElementById('logic-box').innerHTML = "> BACKSPACE: REVERTING LOGIC";
             }
             e.preventDefault(); return;
         }
